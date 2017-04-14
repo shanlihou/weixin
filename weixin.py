@@ -69,7 +69,7 @@ def groupchat_reply(msg):
         strRet = ''
         if mvList:
             for i in mvList:
-                strRet += ' ' + i
+                strRet += '\n\n' + i
             itchat.send(u'%s' % (strRet), msg['FromUserName'])
                     
 
