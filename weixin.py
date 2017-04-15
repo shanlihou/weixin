@@ -55,10 +55,13 @@ def add_friend(msg):
 @itchat.msg_register(TEXT, isGroupChat = True)
 def groupchat_reply(msg):
     print 'groupchat_reply:' 
-    print msg
+    #print msg
     print msg['ActualNickName']
     print msg['FromUserName']
     data = msg['Content'].encode("utf-8")
+    print '\ndata:'
+    print data
+    print '\n'
     if msg['isAt']:
         lenStr = len(u'@鱼塘助手 ')
         recvMsg = msg['Content'][lenStr:]
