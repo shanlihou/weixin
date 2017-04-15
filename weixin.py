@@ -60,8 +60,10 @@ def groupchat_reply(msg):
     print msg['FromUserName']
     data = msg['Content'].encode("utf-8")
     if msg['isAt']:
-        recv = robotChat(msg['Content'])
-        itchat.send(u'@%s\u2005I received: %s' % (msg['ActualNickName'], recv), msg['FromUserName'])
+        lenStr = len(u'@鱼塘助手 ')
+        recvMsg = msg['Content'][lenStr:]
+        recv = robotChat(recvMsg)
+        itchat.send(u'%s' % (recv), msg['FromUserName'])
     elif data.startswith('movie '):
         print data
         recv = msg['Content']
