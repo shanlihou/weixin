@@ -6,6 +6,9 @@ from itchat.content import *
 import sys  
 from magnet import getAllMagnet
 import re
+import threading
+import time 
+#from logWeixin import logWeixin
 reload(sys)  
 sys.setdefaultencoding('utf8')   
 def post(data):
@@ -32,6 +35,7 @@ def text_reply(msg):
     print 'text_reply:' 
     print msg
     recv = robotChat(msg['Text'])
+    print msg['FromUserName']
     itchat.send('%s: %s' % (msg['Type'], recv), msg['FromUserName'])
 
 # 以下四类的消息的Text键下存放了用于下载消息内容的方法，传入文件地址即可
@@ -55,7 +59,7 @@ def add_friend(msg):
 @itchat.msg_register(TEXT, isGroupChat = True)
 def groupchat_reply(msg):
     print 'groupchat_reply:' 
-    #print msg
+    print msg
     print msg['ActualNickName']
     print msg['FromUserName']
     data = msg['Content'].encode("utf-8")
@@ -76,7 +80,22 @@ def groupchat_reply(msg):
             for i in mvList:
                 strRet += '\n\n' + i
             itchat.send(u'%s' % (strRet), msg['FromUserName'])
-                    
+def timeFunc():     
+    while(1):
+        now = time.localtime(time.time())
+        if now.tm_hour == 6 and now.tm_min == 30:
+            recv = robotChat('今天天气怎么样')
+            try:
+                me = itchat.search_friends(remarkName='父母')
+                if me:
+                    for i in me:
+                        userName = i['UserName']
+                        itchat.send(u'%s' % (recv), userName)
+            except KeyError:
+                print 'keyError'
+        time.sleep(59)          
+t = threading.Thread(target=timeFunc)
+t.start()
 
 itchat.auto_login(True)
 itchat.run()
