@@ -42,7 +42,7 @@ def getAllMagnet(code):
     #code=urllib.quote_plus(code)
     print code
     print type(code)
-    code = urllib.quote(code.decode(sys.stdin.encoding).encode('utf8'))  
+    code = urllib.quote(code.decode('UTF-8').encode('utf8'))  
     List = getUrlList('https://btso.pw/search/' + code)
     listFlag = []
     magList = []
