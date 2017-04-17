@@ -1,6 +1,10 @@
 #coding=utf8
 import urllib2
 import urllib
+from DBHelper import DBHelper
+import os
+from wxRequest import wxRequest
+import json
 '''
 def post(url, data):
     req = urllib2.Request(url)  
@@ -39,4 +43,25 @@ def robotChat(data):
     start = resp.index(startStr)
     end = resp.index('"}}]}')
     return resp[start + len(startStr):end]
-print robotChat('呢')
+#print robotChat('呢')
+db = DBHelper()
+db.insert('1544', 'nothing')
+db.insert('1544', 'nothing more', 0)
+result = db.query('1544')
+for i in result:
+    print i
+    print type(i)
+    if i[3] == 0:
+        db.delete(i[0])
+output = os.popen('dir')
+tmp = output.read()
+tmpList = [u'name', u'info']
+tmp = u'name'
+print u'%s' % (tmp.decode("gbk"))
+if tmp in tmpList:
+    print 'in'
+else:
+    print 'not in'
+print tmp 
+print type(tmp)
+#wxRequest.process(u'@鱼塘助手  movie 人民的名义')

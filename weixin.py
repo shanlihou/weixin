@@ -8,9 +8,13 @@ from magnet import getAllMagnet
 import re
 import threading
 import time 
+import os
+import json
 #from logWeixin import logWeixin
+from DBHelper import DBHelper
 reload(sys)  
-sys.setdefaultencoding('utf8')   
+sys.setdefaultencoding('utf8')  
+DB = DBHelper() 
 def post(data):
     #data=urllib.quote_plus(data)
     url = 'http://60.205.206.18/?signature=58a37c24b16f9f442d8854f44edaf85d0687183b&timestamp=1480424201&nonce=2011091517&openid=o1zOPuInKqVUN-7ILHP49CVEIIzs'
@@ -18,6 +22,20 @@ def post(data):
     req = urllib2.Request(url = url, data = data)
     response = urllib2.urlopen(req)
     return response.read()
+infoList = [u'text', u'name', u'detailurl', u'url']
+def parseJson(stJson):
+    global infoList
+    strRet = ''
+    if type(stJson) == list:
+        for i in stJson:
+            strRet += parseJson(i)
+    elif type(stJson) == dict:
+        for key in stJson:
+            if key.encode('utf8') in infoList:
+                strRet += stJson[key] + '\n'
+            else:
+                strRet += parseJson(stJson[key])
+    return strRet
 def robotChat(data):
     url='http://openapi.tuling123.com/openapi/api/v2'
     data = data.encode("utf-8")
@@ -25,10 +43,21 @@ def robotChat(data):
     req = urllib2.Request(url = url, data = data)
     response = urllib2.urlopen(req)
     resp = response.read()
+    stJson = json.loads(resp)
+    print 'resp:'
+    print resp
+    print 'strJson:\n'
+    print stJson
+    '''
     startStr = '"values":{"text":"'
     start = resp.index(startStr)
     end = resp.index('"}}]}')
-    return resp[start + len(startStr):end]
+    return resp[start + len(startStr):end]'''
+    strRet = ''
+    print '\n\n\n\nwill go:\n'
+    strRet = parseJson(stJson)
+    print strRet
+    return strRet
 
 @itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING])
 def text_reply(msg):
@@ -58,6 +87,7 @@ def add_friend(msg):
 # 在注册时增加isGroupChat=True将判定为群聊回复
 @itchat.msg_register(TEXT, isGroupChat = True)
 def groupchat_reply(msg):
+    global DB
     print 'groupchat_reply:' 
     print msg
     print msg['ActualNickName']
@@ -80,22 +110,58 @@ def groupchat_reply(msg):
             for i in mvList:
                 strRet += '\n\n' + i
             itchat.send(u'%s' % (strRet), msg['FromUserName'])
+            return
+        itchat.send(u'%s 搜索失败' % (recv[len('movie ')]), msg['FromUserName'])
+        
+    elif data.startswith('notify'): 
+        notify = data.split(' ')
+        print notify
+        if notify[1].isdigit() and len(notify[1]) == 4:
+            if len(notify) == 3:
+                DB.insert(notify[1], notify[2])
+                itchat.send(u'添加操作成功', msg['FromUserName'])
+            elif len(notify) == 4 and notify[3].isdigit():
+                DB.insert(notify[1], notify[2], notify[3])   
+                itchat.send(u'添加操作成功', msg['FromUserName']) 
+    elif data.startswith('shell'): 
+        me = itchat.search_friends(remarkName='父母')  
+        if me:
+            for i in me:
+                userName = i['UserName']
+                if userName == msg['ActualUserName']:
+                    shell = data.split(' ', 1)[1]
+                    print shell
+                    output = os.popen(shell)
+                    itchat.send(u'%s' % (output.read().decode('gbk')), msg['FromUserName']) 
+                    
+def notifyMe(data):
+    try:
+        me = itchat.search_friends(remarkName='父母')
+        if me:
+            for i in me:
+                userName = i['UserName']
+                itchat.send(u'%s' % (data), userName)
+    except KeyError:
+        print 'keyError'
 def timeFunc():     
     while(1):
         now = time.localtime(time.time())
-        if now.tm_hour == 6 and now.tm_min == 30:
+        timeStr = time.strftime('%H%M')
+        result = DB.query(timeStr)
+        for i in result:
+            notifyMe('%s:%s' % (i[1], i[2]))
+            if i[3] == 0:
+                DB.delete(i[0])
+        if now.tm_hour == 10 and now.tm_min == 0:
+            recv = robotChat('明天天气怎么样')
+            notifyMe(recv)
+        elif now.tm_hour == 6 and now.tm_min == 30:
             recv = robotChat('今天天气怎么样')
-            try:
-                me = itchat.search_friends(remarkName='父母')
-                if me:
-                    for i in me:
-                        userName = i['UserName']
-                        itchat.send(u'%s' % (recv), userName)
-            except KeyError:
-                print 'keyError'
+            notifyMe(recv)
         time.sleep(59)          
 t = threading.Thread(target=timeFunc)
 t.start()
 
 itchat.auto_login(True)
 itchat.run()
+DB.close()
