@@ -96,6 +96,16 @@ def groupchat_reply(msg):
     print '\ndata:'
     print data
     print '\n'
+    info = itchat.get_friends()
+    print info
+    for i in info:
+        print i
+        print i[u'Uin']
+    print type(info)
+    print '\n\n\n'
+    info = itchat.get_chatrooms()
+    for i in info:
+        print i
     if msg['isAt']:
         lenStr = len(u'@鱼塘助手 ')
         recvMsg = msg['Content'][lenStr:]
@@ -152,7 +162,7 @@ def timeFunc():
             notifyMe('%s:%s' % (i[1], i[2]))
             if i[3] == 0:
                 DB.delete(i[0])
-        if now.tm_hour == 10 and now.tm_min == 0:
+        if now.tm_hour == 22 and now.tm_min == 0:
             recv = robotChat('明天天气怎么样')
             notifyMe(recv)
         elif now.tm_hour == 6 and now.tm_min == 30:
@@ -161,7 +171,6 @@ def timeFunc():
         time.sleep(59)          
 t = threading.Thread(target=timeFunc)
 t.start()
-
 itchat.auto_login(True)
 itchat.run()
 DB.close()
