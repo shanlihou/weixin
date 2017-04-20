@@ -10,11 +10,16 @@ import threading
 import time 
 import os
 import json
+from contacts import contacts
 #from logWeixin import logWeixin
 from DBHelper import DBHelper
+from filter import filtHelper
+import datetime
 reload(sys)  
 sys.setdefaultencoding('utf8')  
 DB = DBHelper() 
+contact = contacts()
+filt = filtHelper()
 def post(data):
     #data=urllib.quote_plus(data)
     url = 'http://60.205.206.18/?signature=58a37c24b16f9f442d8854f44edaf85d0687183b&timestamp=1480424201&nonce=2011091517&openid=o1zOPuInKqVUN-7ILHP49CVEIIzs'
@@ -82,7 +87,9 @@ def add_friend(msg):
     print msg
     itchat.add_friend(**msg['Text']) # 该操作会自动将新好友的消息录入，不需要重载通讯录
     itchat.send_msg('Nice to meet you!', msg['RecommendInfo']['UserName'])
-
+    userInfo = itchat.search_friends(userName = msg['RecommendInfo']['UserName'])
+    wx_id = userInfo[0][u'Uin']
+    contact.push(wx_id, msg['RecommendInfo']['UserName'])
 
 # 在注册时增加isGroupChat=True将判定为群聊回复
 @itchat.msg_register(TEXT, isGroupChat = True)
@@ -90,22 +97,18 @@ def groupchat_reply(msg):
     global DB
     print 'groupchat_reply:' 
     print msg
-    print msg['ActualNickName']
-    print msg['FromUserName']
     data = msg['Content'].encode("utf-8")
     print '\ndata:'
     print data
     print '\n'
-    info = itchat.get_friends()
-    print info
-    for i in info:
-        print i
-        print i[u'Uin']
-    print type(info)
-    print '\n\n\n'
-    info = itchat.get_chatrooms()
-    for i in info:
-        print i
+    userInfo = itchat.search_chatrooms(userName = msg['FromUserName'])
+    print userInfo
+    wx_id = userInfo[u'Uin']
+    contact.push(wx_id, msg['FromUserName'])
+    filtStr = filt.filter(msg['Content'])
+    if filtStr:
+        itchat.send(u'%s' % (filtStr), msg['FromUserName'])
+        return
     if msg['isAt']:
         lenStr = len(u'@鱼塘助手 ')
         recvMsg = msg['Content'][lenStr:]
@@ -143,6 +146,40 @@ def groupchat_reply(msg):
                     print shell
                     output = os.popen(shell)
                     itchat.send(u'%s' % (output.read().decode('gbk')), msg['FromUserName']) 
+                    return
+        itchat.send(u'操作失败', msg['FromUserName']) 
+        
+    elif data.startswith('week'):
+        opt = data.split(' ')
+        if len(opt) >= 4 and opt[1].isdigit() and opt[2].isdigit() and len(opt[1]) <= 7 and len(opt[2]) == 4:
+            if len(opt) == 5 and opt[4].isdigit() and len(opt[4]) == 3:
+                DB.allInsert(wx_id, opt[1], opt[2], opt[3], opt[4])
+                itchat.send(u'添加操作成功', msg['FromUserName'])
+            else:
+                DB.allInsert(wx_id, opt[1], opt[2], opt[3], '000')
+                itchat.send(u'添加操作成功', msg['FromUserName'])
+            return
+        itchat.send(u'操作失败', msg['FromUserName']) 
+    elif data.startswith('day'):
+        opt = data.split(' ')
+        if len(opt) >= 4 and opt[1].isdigit() and opt[2].isdigit() and len(opt[1]) == 4 and len(opt[2]) == 4:
+            if len(opt) == 5 and opt[4].isdigit() and len(opt[4]) == 3:
+                DB.allInsert(wx_id, opt[1], opt[2], opt[3], opt[4])
+                itchat.send(u'添加操作成功', msg['FromUserName'])
+            else:
+                DB.allInsert(wx_id, opt[1], opt[2], opt[3], '010')
+                itchat.send(u'添加操作成功', msg['FromUserName'])
+            return 
+        itchat.send(u'操作失败', msg['FromUserName']) 
+    elif data.startswith('filt'):
+        opt = data.split(' ')
+        if len(opt) == 3:
+            filt.insert(opt[1], opt[2])
+            itchat.send(u'添加操作成功', msg['FromUserName']) 
+            return 
+        itchat.send(u'操作失败', msg['FromUserName']) 
+            
+            
                     
 def notifyMe(data):
     try:
@@ -153,6 +190,34 @@ def notifyMe(data):
                 itchat.send(u'%s' % (data), userName)
     except KeyError:
         print 'keyError'
+def notifyAll(info):
+    type = info[5]
+    if type[1] == '0':
+        d = datetime.datetime.now()
+        week = str(d.weekday())
+        if week not in info[2]:
+            return
+        if type[2] == '0':
+            itchat.send(u'%s' % (info[4]), contact.getUserName(info[1]))
+        else:
+            recv = robotChat(info[4])
+            itchat.send(u'%s' % (recv), contact.getUserName(info[1]))
+        if type[0] == '0':
+            DB.allDelete(info[0])
+    elif type[1] == '1':
+        timeStr = time.strftime('%m%d')
+        if timeStr != info[2]:
+            return
+        if type[2] == '0':
+            itchat.send(u'%s' % (info[4]), contact.getUserName(info[1]))
+        else:
+            recv = robotChat(info[4])
+            itchat.send(u'%s' % (recv), contact.getUserName(info[1]))
+        if type[0] == '0':
+            DB.allDelete(info[0])
+        
+            
+        
 def timeFunc():     
     while(1):
         now = time.localtime(time.time())
@@ -168,6 +233,10 @@ def timeFunc():
         elif now.tm_hour == 6 and now.tm_min == 30:
             recv = robotChat('今天天气怎么样')
             notifyMe(recv)
+        
+        result = DB.allQuery(timeStr)
+        for i in result:
+            notifyAll(i)
         time.sleep(59)          
 t = threading.Thread(target=timeFunc)
 t.start()

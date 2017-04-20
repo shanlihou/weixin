@@ -4,7 +4,9 @@ import urllib
 from DBHelper import DBHelper
 import os
 from wxRequest import wxRequest
+from filter import filtHelper
 import json
+import datetime
 '''
 def post(url, data):
     req = urllib2.Request(url)  
@@ -45,6 +47,7 @@ def robotChat(data):
     return resp[start + len(startStr):end]
 #print robotChat('呢')
 db = DBHelper()
+print id(db)
 db.insert('1544', 'nothing')
 db.insert('1544', 'nothing more', 0)
 result = db.query('1544')
@@ -64,4 +67,26 @@ else:
     print 'not in'
 print tmp 
 print type(tmp)
-#wxRequest.process(u'@鱼塘助手  movie 人民的名义')
+pre = u'你是谁'
+utf8 = pre.encode('utf8')
+UTF_8 = pre.encode('gbk')
+utf_8 = pre.encode('utf-8')
+print utf8,UTF_8,utf_8
+if utf8 == UTF_8:
+    print '1'
+if utf8 == utf_8:
+    print '2'
+if UTF_8 == utf_8:
+    print '3'
+
+filt = filtHelper()
+filt.insert('23', 'ckz是我最敬仰的人')
+filt.insert('我们', '陈科争是我最敬仰的人')
+print filt.get('ckz')
+print filt.get('陈科争')
+print filt.filter('陈科争是个智障')
+result = db.filtQuery()
+print type(result)
+d = datetime.datetime.now()
+print d.weekday()
+print type(d.weekday())
