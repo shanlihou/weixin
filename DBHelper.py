@@ -70,7 +70,17 @@ class DBHelper(object):
         sql = 'delete from notify_all where id = %s'
         self.cur.execute(sql % (str(id)))
         self.conn.commit()
-        
+    
+    def printDB(self, DBName):
+        sql = 'select * from %s'
+        count = self.cur.execute(sql % (DBName))
+        result = self.cur.fetchmany(count)
+        strRet = ''
+        for i in result:
+            for j in i:
+                strRet += str(j) + ' '
+            strRet += '\n'
+        return strRet
     def close(self):
         self.cur.close()
         self.conn.close()

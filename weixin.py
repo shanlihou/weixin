@@ -95,20 +95,13 @@ def add_friend(msg):
 @itchat.msg_register(TEXT, isGroupChat = True)
 def groupchat_reply(msg):
     global DB
-    print 'groupchat_reply:' 
-    print msg
     data = msg['Content'].encode("utf-8")
-    print '\ndata:'
-    print data
-    print '\n'
     userInfo = itchat.search_chatrooms(userName = msg['FromUserName'])
-    print userInfo
     wx_id = userInfo[u'Uin']
     contact.push(wx_id, msg['FromUserName'])
     filtStr = filt.filter(msg['Content'])
     if filtStr:
         itchat.send(u'%s' % (filtStr), msg['FromUserName'])
-        return
     if msg['isAt']:
         lenStr = len(u'@鱼塘助手 ')
         recvMsg = msg['Content'][lenStr:]
@@ -174,10 +167,33 @@ def groupchat_reply(msg):
     elif data.startswith('filt'):
         opt = data.split(' ')
         if len(opt) == 3:
+            if opt[1] == 'delete':
+                filt.delete(opt[2])
+                itchat.send(u'删除成功', msg['FromUserName']) 
+                return 
             filt.insert(opt[1], opt[2])
             itchat.send(u'添加操作成功', msg['FromUserName']) 
             return 
         itchat.send(u'操作失败', msg['FromUserName']) 
+    elif data.startswith('print'):
+        opt = data.split(' ')
+        if len(opt) == 2:
+            if opt[1] == 'notify' or opt[1] == 'notify_all':
+                strRet = DB.printDB(opt[1])
+                itchat.send(u'%s' % (strRet), msg['FromUserName']) 
+                return 
+        itchat.send(u'操作失败', msg['FromUserName']) 
+    elif data.startswith('delete'):
+        opt = data.split(' ')
+        if len(opt) == 3 and opt[2].isdigit():
+            if opt[1] == 'notify':
+                DB.delete(opt[2])
+            elif opt[1] == 'notify_all':
+                DB.allDelete(opt[2])
+            itchat.send(u'操作成功', msg['FromUserName']) 
+            return 
+        itchat.send(u'操作失败', msg['FromUserName']) 
+                
             
             
                     
