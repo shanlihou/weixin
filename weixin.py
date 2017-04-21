@@ -166,7 +166,7 @@ def groupchat_reply(msg):
         itchat.send(u'操作失败', msg['FromUserName']) 
     elif data.startswith('filt'):
         opt = data.split(' ')
-        if len(opt) == 3 and opt[2] < 50:
+        if len(opt) == 3 and len(opt[2]) < 50 and len(opt[1]) < 20:
             if opt[1] == 'delete':
                 filt.delete(opt[2])
                 itchat.send(u'删除成功', msg['FromUserName']) 

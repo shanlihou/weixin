@@ -84,10 +84,11 @@ class DBHelper(object):
         strRet = ''
         for i in result:
             for j in i:
+	    	print j
                 if type(j) != str:
                     strRet += str(j) + ' '
                 else:
-                    strRet += j + ' '
+                    strRet += j.encode('utf8') + ' '
             strRet += '\n'
         return strRet
     def close(self):
