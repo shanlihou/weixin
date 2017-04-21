@@ -184,7 +184,7 @@ def groupchat_reply(msg):
                 print opt[1]
                 strRet = DB.printDB(opt[1])
                 print strRet
-                itchat.send(u'%s' % (strRet.decode('UTF-8')), msg['FromUserName']) 
+                itchat.send('%s' % (strRet), msg['FromUserName']) 
                 return 
         itchat.send(u'操作失败', msg['FromUserName']) 
     elif data.startswith('delete'):
