@@ -96,6 +96,7 @@ def add_friend(msg):
 def groupchat_reply(msg):
     global DB
     data = msg['Content'].encode("utf-8")
+    print data
     userInfo = itchat.search_chatrooms(userName = msg['FromUserName'])
     wx_id = userInfo[u'Uin']
     contact.push(wx_id, msg['FromUserName'])
@@ -178,8 +179,11 @@ def groupchat_reply(msg):
     elif data.startswith('print'):
         opt = data.split(' ')
         if len(opt) == 2:
+            print 'opt 1:' + opt[1]
             if opt[1] == 'notify' or opt[1] == 'notify_all':
+                print opt[1]
                 strRet = DB.printDB(opt[1])
+                print strRet
                 itchat.send(u'%s' % (strRet), msg['FromUserName']) 
                 return 
         itchat.send(u'操作失败', msg['FromUserName']) 
@@ -254,8 +258,17 @@ def timeFunc():
         for i in result:
             notifyAll(i)
         time.sleep(59)          
-t = threading.Thread(target=timeFunc)
-t.start()
-itchat.auto_login(enableCmdQR=True)
+
+def watchFun():
+    while(1):
+        print 'thread go'
+        t = threading.Thread(target=timeFunc)
+        t.start()
+        t.join()
+        time.sleep(60)
+watchDog = threading.Thread(target=watchFun)
+watchDog.start()
+itchat.auto_login(True)
 itchat.run()
+print 'will close'
 DB.close()

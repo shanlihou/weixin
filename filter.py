@@ -24,6 +24,10 @@ class filtHelper(object):
             self.filtDict[i[0]] = i[1]
     def filter(self, data):
         for key in self.filtDict:
+            print type(key)
+            print key
+            print type(data)
+            print data
             if key in data:
                 return self.filtDict[key]
         return None
