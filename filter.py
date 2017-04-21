@@ -28,7 +28,7 @@ class filtHelper(object):
             print key
             print type(data)
             print data
-            if key in data:
+            if key in data.encode('utf8'):
                 return self.filtDict[key]
         return None
     def insert(self, key, value):
