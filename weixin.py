@@ -256,6 +256,6 @@ def timeFunc():
         time.sleep(59)          
 t = threading.Thread(target=timeFunc)
 t.start()
-itchat.auto_login(True)
+itchat.auto_login(enableCmdQR=True)
 itchat.run()
 DB.close()
