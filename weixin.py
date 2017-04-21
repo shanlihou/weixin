@@ -122,8 +122,7 @@ def groupchat_reply(msg):
         
     elif data.startswith('notify'): 
         notify = data.split(' ')
-        print notify
-        if notify[1].isdigit() and len(notify[1]) == 4:
+        if notify[1].isdigit() and len(notify[1]) == 4 and len(notify[2]) < 50:
             if len(notify) == 3:
                 DB.insert(notify[1], notify[2])
                 itchat.send(u'添加操作成功', msg['FromUserName'])
@@ -179,12 +178,9 @@ def groupchat_reply(msg):
     elif data.startswith('print'):
         opt = data.split(' ')
         if len(opt) == 2:
-            print 'opt 1:' + opt[1]
             if opt[1] == 'notify' or opt[1] == 'notify_all':
-                print opt[1]
                 strRet = DB.printDB(opt[1])
-                print strRet
-                itchat.send('%s' % (strRet), msg['FromUserName']) 
+                itchat.send(u'%s' % (strRet), msg['FromUserName']) 
                 return 
         itchat.send(u'操作失败', msg['FromUserName']) 
     elif data.startswith('delete'):
@@ -197,7 +193,6 @@ def groupchat_reply(msg):
             itchat.send(u'操作成功', msg['FromUserName']) 
             return 
         itchat.send(u'操作失败', msg['FromUserName']) 
-                
             
             
                     

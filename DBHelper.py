@@ -1,3 +1,4 @@
+#coding=utf8
 import MySQLdb
 import threading
 from _mysql import OperationalError
@@ -83,7 +84,10 @@ class DBHelper(object):
         strRet = ''
         for i in result:
             for j in i:
-                strRet += str(j) + ' '
+		if type(j) != str:
+			strRet += str(j).decode('utf8') + ' '
+		else:
+			strRet += j.decode('utf8') + ' '
             strRet += '\n'
         return strRet
     def close(self):
