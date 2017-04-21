@@ -144,7 +144,7 @@ def groupchat_reply(msg):
         
     elif data.startswith('week'):
         opt = data.split(' ')
-        if len(opt) >= 4 and opt[1].isdigit() and opt[2].isdigit() and len(opt[1]) <= 7 and len(opt[2]) == 4:
+        if len(opt) >= 4 and opt[1].isdigit() and opt[2].isdigit() and len(opt[1]) <= 7 and len(opt[2]) == 4 and len(opt[3]) < 50:
             if len(opt) == 5 and opt[4].isdigit() and len(opt[4]) == 3:
                 DB.allInsert(wx_id, opt[1], opt[2], opt[3], opt[4])
                 itchat.send(u'添加操作成功', msg['FromUserName'])
@@ -155,7 +155,7 @@ def groupchat_reply(msg):
         itchat.send(u'操作失败', msg['FromUserName']) 
     elif data.startswith('day'):
         opt = data.split(' ')
-        if len(opt) >= 4 and opt[1].isdigit() and opt[2].isdigit() and len(opt[1]) == 4 and len(opt[2]) == 4:
+        if len(opt) >= 4 and opt[1].isdigit() and opt[2].isdigit() and len(opt[1]) == 4 and len(opt[2]) == 4 and len(opt[3]) < 50:
             if len(opt) == 5 and opt[4].isdigit() and len(opt[4]) == 3:
                 DB.allInsert(wx_id, opt[1], opt[2], opt[3], opt[4])
                 itchat.send(u'添加操作成功', msg['FromUserName'])
@@ -166,7 +166,7 @@ def groupchat_reply(msg):
         itchat.send(u'操作失败', msg['FromUserName']) 
     elif data.startswith('filt'):
         opt = data.split(' ')
-        if len(opt) == 3:
+        if len(opt) == 3 and opt[2] < 50:
             if opt[1] == 'delete':
                 filt.delete(opt[2])
                 itchat.send(u'删除成功', msg['FromUserName']) 
@@ -178,7 +178,7 @@ def groupchat_reply(msg):
     elif data.startswith('print'):
         opt = data.split(' ')
         if len(opt) == 2:
-            if opt[1] == 'notify' or opt[1] == 'notify_all':
+            if opt[1] == 'notify' or opt[1] == 'notify_all' or opt[1] == 'filter':
                 strRet = DB.printDB(opt[1])
                 itchat.send(u'%s' % (strRet), msg['FromUserName']) 
                 return 
