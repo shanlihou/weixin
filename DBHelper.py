@@ -43,6 +43,7 @@ class DBHelper(object):
         self.conn.commit()       
     def userInsert(self, username, score):
         sql = 'insert user_info(username, score) values(%s, %s)'
+        print 'insert', username, score
         self.cur.execute(sql, (username.encode('utf8'), str(score)))
         self.conn.commit()
         
@@ -73,6 +74,7 @@ class DBHelper(object):
         self.conn.commit()
     def userUpdate(self, username, score):
         sql = "update user_info i set i.score = '%s' where i.username = '%s'"
+        print sql % (str(score), username)
         self.cur.execute(sql % (str(score), username))
         self.conn.commit()
         
