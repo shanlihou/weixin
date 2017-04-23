@@ -97,12 +97,15 @@ def groupchat_reply(msg):
     global DB
     data = msg['Content'].encode("utf-8")
     print data
-    userInfo = itchat.search_chatrooms(userName = msg['FromUserName'])
-    wx_id = userInfo[u'Uin']
-    contact.push(wx_id, msg['FromUserName'])
-    filtStr = filt.filter(msg['Content'])
-    if filtStr:
-        itchat.send(u'%s' % (filtStr), msg['FromUserName'])
+    try:
+        userInfo = itchat.search_chatrooms(userName = msg['FromUserName'])
+        wx_id = userInfo[u'Uin']
+        contact.push(wx_id, msg['FromUserName'])
+        filtStr = filt.filter(msg['Content'])
+        if filtStr:
+            itchat.send(u'%s' % (filtStr), msg['FromUserName'])
+    except KeyError:
+        print userInfo
     if msg['isAt']:
         lenStr = len(u'@鱼塘助手 ')
         recvMsg = msg['Content'][lenStr:]

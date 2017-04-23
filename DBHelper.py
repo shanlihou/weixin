@@ -41,7 +41,6 @@ class DBHelper(object):
         
     def query(self, timeStr):
         sql = 'select * from notify where time = %s'
-        print sql %(timeStr)
         count = self.cur.execute(sql % (timeStr))
         result = self.cur.fetchmany(count)
         return result
