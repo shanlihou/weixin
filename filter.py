@@ -25,7 +25,10 @@ class filtHelper(object):
             self.filtDict[i[0]] = i[1]
     def filter(self, data):
         for key in self.filtDict:
-            if key in data.encode('utf8'):
+            print key 
+            print data
+            print type(data)
+            if key in data:
                 return self.filtDict[key]
         return None
     def insert(self, key, value):

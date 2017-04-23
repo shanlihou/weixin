@@ -15,11 +15,13 @@ from contacts import contacts
 from DBHelper import DBHelper
 from filter import filtHelper
 import datetime
+from guessNumber import guessNumber
 reload(sys)  
 sys.setdefaultencoding('utf8')  
 DB = DBHelper() 
 contact = contacts()
 filt = filtHelper()
+guess = guessNumber()
 def post(data):
     #data=urllib.quote_plus(data)
     url = 'http://60.205.206.18/?signature=58a37c24b16f9f442d8854f44edaf85d0687183b&timestamp=1480424201&nonce=2011091517&openid=o1zOPuInKqVUN-7ILHP49CVEIIzs'
@@ -97,6 +99,7 @@ def groupchat_reply(msg):
     global DB
     data = msg['Content'].encode("utf-8")
     print data
+    wx_id = 0
     try:
         userInfo = itchat.search_chatrooms(userName = msg['FromUserName'])
         wx_id = userInfo[u'Uin']
@@ -106,6 +109,11 @@ def groupchat_reply(msg):
             itchat.send(u'%s' % (filtStr), msg['FromUserName'])
     except KeyError:
         print userInfo
+    strResp = guess.parse(msg[u'Content'], msg[u'ActualNickName'])
+    print 'resp', strResp
+    if strResp:
+        itchat.send(u'%s' % (strResp), msg['FromUserName'])  
+        return  
     if msg['isAt']:
         lenStr = len(u'@鱼塘助手 ')
         recvMsg = msg['Content'][lenStr:]
@@ -181,7 +189,7 @@ def groupchat_reply(msg):
     elif data.startswith('print'):
         opt = data.split(' ')
         if len(opt) == 2:
-            if opt[1] == 'notify' or opt[1] == 'notify_all' or opt[1] == 'filter':
+            if opt[1] == 'notify' or opt[1] == 'notify_all' or opt[1] == 'filter' or opt[1] == 'user_info':
                 strRet = DB.printDB(opt[1])
                 itchat.send(u'%s' % (strRet), msg['FromUserName']) 
                 return 

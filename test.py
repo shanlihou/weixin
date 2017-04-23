@@ -7,6 +7,7 @@ from wxRequest import wxRequest
 from filter import filtHelper
 import json
 import datetime
+from guessNumber import guessNumber
 '''
 def post(url, data):
     req = urllib2.Request(url)  
@@ -90,3 +91,10 @@ print type(result)
 d = datetime.datetime.now()
 print d.weekday()
 print type(d.weekday())
+
+guess = guessNumber()
+print guess.parse('猜数字', '小名')
+while (1):
+    strRecv = raw_input('nihao:')
+    print guess.parse(strRecv, '小刚')
+    strRecv = ''

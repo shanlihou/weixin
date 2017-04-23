@@ -1,3 +1,4 @@
+#coding=utf8
 import MySQLdb
 import threading
 from _mysql import OperationalError
@@ -15,12 +16,12 @@ class DBHelper(object):
         return cls.__instance
         
     def __init__(self):
-        self.conn = MySQLdb.connect(host = 'localhost', port = 3306, user = 'root', passwd = 'root', db = 'mysql')
+        self.conn = MySQLdb.connect(host = 'localhost', port = 3306, user = 'root', passwd = 'root', db = 'mysql', charset="utf8")
         self.cur = self.conn.cursor()
         self.cur.execute("create table if not exists notify(id int NOT NULL AUTO_INCREMENT, time varchar(20), info varchar(50), type int, PRIMARY KEY (id))")
         self.cur.execute("create table if not exists filter(key_ varchar(20), value varchar(50), PRIMARY KEY (key_))")
         self.cur.execute("create table if not exists notify_all(id int NOT NULL AUTO_INCREMENT, wx_id varchar(40), date varchar(20), time varchar(20), info varchar(50), type varchar(8), PRIMARY KEY (id))")
-        self.cur.execute("create table if not exists user_info(username varchar(20), score int, PRIMARY KEY (username))")
+        self.cur.execute("create table if not exists user_info(username varchar(50), score int, PRIMARY KEY (username))")
         #type 0: times, 1: week or date, 2: reverse or not
         self.conn.commit()
         
@@ -39,7 +40,7 @@ class DBHelper(object):
         self.conn.commit()       
     def userInsert(self, username, score):
         sql = 'insert user_info(username, score) values(%s, %s)'
-        self.cur.execute(sql, (username, score))
+        self.cur.execute(sql, (username.encode('utf8'), str(score)))
         self.conn.commit()
         
         
@@ -69,7 +70,7 @@ class DBHelper(object):
         self.conn.commit()
     def userUpdate(self, username, score):
         sql = "update user_info i set i.score = '%s' where i.username = '%s'"
-        self.cur.execute(sql % (username, score))
+        self.cur.execute(sql % (str(score), username))
         self.conn.commit()
         
     def delete(self, id):

@@ -22,15 +22,17 @@ class userHelper(object):
     def getScore(self, username):
         if self.mDict.has_key(username):
             return self.mDict[username]
-        return 0
+        self.mDict[username] = 100
+        self.updateScore(username, 100)
+        return 100
     
     def updateScore(self, username, score):
         if self.mDict.has_key(username):
             self.mDict[username] = score
+            self.db.userUpdate(username, score)
         else:
             self.mDict[username] = score
             self.db.userInsert(username, score)
-    def addUser(self, username):
         
             
         
