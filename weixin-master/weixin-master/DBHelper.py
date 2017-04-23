@@ -1,6 +1,5 @@
 import MySQLdb
 import threading
-from _mysql import OperationalError
 Lock = threading.Lock()
 class DBHelper(object):
     __instance = None
@@ -60,7 +59,7 @@ class DBHelper(object):
         return result
     def userQuery(self):
         sql = 'select * from user_info'
-        count = self.cur.execute(sql)
+        count = self.cur.execute(sql % (username))
         return self.cur.fetchmany(count)
     
     def filtUpdate(self, key, value):
@@ -69,7 +68,7 @@ class DBHelper(object):
         self.conn.commit()
     def userUpdate(self, username, score):
         sql = "update user_info i set i.score = '%s' where i.username = '%s'"
-        self.cur.execute(sql % (username, score))
+        self.cur.execute(sql % (key, value))
         self.conn.commit()
         
     def delete(self, id):
@@ -77,12 +76,9 @@ class DBHelper(object):
         self.cur.execute(sql % (str(id)))
         self.conn.commit()
     def filtDelete(self, key):
-        try:
-            sql = 'delete from filter where key_ = %s'
-            self.cur.execute(sql % (key))
-            self.conn.commit()
-        except OperationalError:
-            print 'filtDelete'
+        sql = 'delete from filter where key_ = %s'
+        self.cur.execute(sql % (key))
+        self.conn.commit()
     def allDelete(self, id):
         sql = 'delete from notify_all where id = %s'
         self.cur.execute(sql % (str(id)))
