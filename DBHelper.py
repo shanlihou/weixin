@@ -16,6 +16,7 @@ class DBHelper(object):
         return cls.__instance
         
     def __init__(self):
+        #self.conn = MySQLdb.connect(host = 'localhost', port = 3306, user = 'root', passwd = 'root', db = 'mysql')
         self.conn = MySQLdb.connect(host = 'localhost', port = 3306, user = 'root', passwd = 'root', db = 'mysql', charset="utf8")
         self.cur = self.conn.cursor()
         self.cur.execute("create table if not exists notify(id int NOT NULL AUTO_INCREMENT, time varchar(20), info varchar(50), type int, PRIMARY KEY (id))")
@@ -23,6 +24,8 @@ class DBHelper(object):
         self.cur.execute("create table if not exists notify_all(id int NOT NULL AUTO_INCREMENT, wx_id varchar(40), date varchar(20), time varchar(20), info varchar(50), type varchar(8), PRIMARY KEY (id))")
         self.cur.execute("create table if not exists user_info(username varchar(50), score int, PRIMARY KEY (username))")
         #type 0: times, 1: week or date, 2: reverse or not
+        self.cur.execute('set collation_database=utf8_general_ci;')
+        self.cur.execute('set collation_server=utf8_general_ci;')
         self.conn.commit()
         
     def insert(self, timeStr, info, tType=0):
@@ -70,6 +73,7 @@ class DBHelper(object):
         self.conn.commit()
     def userUpdate(self, username, score):
         sql = "update user_info i set i.score = '%s' where i.username = '%s'"
+        print sql % (str(score), username)
         self.cur.execute(sql % (str(score), username))
         self.conn.commit()
         
