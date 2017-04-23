@@ -73,7 +73,6 @@ class DBHelper(object):
         self.conn.commit()
     def userUpdate(self, username, score):
         sql = "update user_info i set i.score = '%s' where i.username = '%s'"
-        print sql % (str(score), username)
         self.cur.execute(sql % (str(score), username))
         self.conn.commit()
         

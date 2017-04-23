@@ -1,5 +1,6 @@
 import threading
 from DBHelper import DBHelper
+import string
 Lock = threading.Lock()
 class userHelper(object):
     __instance = None
@@ -33,6 +34,8 @@ class userHelper(object):
         else:
             self.mDict[username] = score
             self.db.userInsert(username, score)
+    def sort(self):
+        return sorted(self.mDict.items(), lambda x, y: x[1] > y[1])
         
             
         

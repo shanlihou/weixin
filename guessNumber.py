@@ -28,8 +28,13 @@ class guessNumber(object):
         print recv, name
         if recv == '积分':
             return '你的积分为:%s' % (score)
+        elif recv == '排行榜':
+            strRet = ''
+            dictRet = self.users.sort()
+            for i in dictRet:
+                strRet += i[0] + ':' + str(i[1]) + '\n'
+            return strRet
         elif recv == '签到':
-            now = time.localtime(time.time())
             timeStr = time.strftime('%m%d')
             signStr = name + timeStr
             if self.sign.has_key(signStr):
