@@ -31,8 +31,10 @@ class guessNumber(object):
         elif recv == '排行榜':
             strRet = ''
             dictRet = self.users.sort()
+            count = 0
             for i in dictRet:
-                strRet += i[0] + ':' + str(i[1]) + '\n'
+                count += 1
+                strRet += str(count) + ':' + i[0] + ':' + str(i[1]) + '\n'
             return strRet
         elif recv == '签到':
             timeStr = time.strftime('%m%d')

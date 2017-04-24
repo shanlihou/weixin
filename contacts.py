@@ -24,6 +24,8 @@ class contacts(object):
         except KeyError:
             print 'keyError'
     def notifyAll(self, strSend):
+        if not self.mList:
+            self.getDict()
         for i in self.mList:
             itchat.send(u'%s' % (strSend), i)            
     def push(self, wx_id, userName):

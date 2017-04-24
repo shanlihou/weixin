@@ -52,19 +52,13 @@ def robotChat(data):
     response = urllib2.urlopen(req)
     resp = response.read()
     stJson = json.loads(resp)
-    print 'resp:'
-    print resp
-    print 'strJson:\n'
-    print stJson
     '''
     startStr = '"values":{"text":"'
     start = resp.index(startStr)
     end = resp.index('"}}]}')
     return resp[start + len(startStr):end]'''
     strRet = ''
-    print '\n\n\n\nwill go:\n'
     strRet = parseJson(stJson)
-    print strRet
     return strRet
 
 @itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING])
@@ -227,7 +221,7 @@ def notifyAll(info):
     flag = info[5]
     if flag[1] == '0':
         d = datetime.datetime.now()
-        week = str(d.weekday())
+        week = str(d.weekday() + 1)
         if week not in info[2]:
             return
         if flag[2] == '0':
