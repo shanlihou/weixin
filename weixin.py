@@ -108,7 +108,7 @@ def groupchat_reply(msg):
         if filtStr:
             itchat.send(u'%s' % (filtStr), msg['FromUserName'])
     except KeyError:
-        print userInfo
+        print 'keyError'
     strResp = guess.parse(msg[u'Content'], msg[u'ActualNickName'])
     print 'resp', strResp
     if strResp:

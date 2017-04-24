@@ -35,7 +35,7 @@ class userHelper(object):
             self.mDict[username] = score
             self.db.userInsert(username, score)
     def sort(self):
-        return sorted(self.mDict.items(), lambda x, y: x[1] > y[1])
+        return sorted(self.mDict.items(), key = lambda x: x[1], reverse=True)
         
             
         
