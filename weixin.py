@@ -10,6 +10,7 @@ import threading
 import time 
 import os
 import json
+import random
 from contacts import contacts
 #from logWeixin import logWeixin
 from DBHelper import DBHelper
@@ -101,16 +102,14 @@ def groupchat_reply(msg):
     print data
     wx_id = 0
     try:
-        userInfo = itchat.search_chatrooms(userName = msg['FromUserName'])
-        wx_id = userInfo[u'Uin']
-        contact.push(wx_id, msg['FromUserName'])
         filtStr = filt.filter(msg['Content'])
         if filtStr:
-            itchat.send(u'%s' % (filtStr), msg['FromUserName'])
+            num = random.randint(0, 10)
+            if num < 5:
+                itchat.send(u'%s' % (filtStr), msg['FromUserName'])
     except KeyError:
         print 'keyError'
     strResp = guess.parse(msg[u'Content'], msg[u'ActualNickName'])
-    print 'resp', strResp
     if strResp:
         itchat.send(u'%s' % (strResp), msg['FromUserName'])  
         return  
@@ -204,6 +203,14 @@ def groupchat_reply(msg):
             itchat.send(u'操作成功', msg['FromUserName']) 
             return 
         itchat.send(u'操作失败', msg['FromUserName']) 
+    else:
+        num = random.randint(0, 10)
+        print num
+        if num == 5:
+            recvMsg = msg['Content']
+            recv = robotChat(recvMsg)
+            itchat.send(u'%s' % (recv), msg['FromUserName'])
+            
             
             
                     
@@ -217,29 +224,29 @@ def notifyMe(data):
     except KeyError:
         print 'keyError'
 def notifyAll(info):
-    type = info[5]
-    if type[1] == '0':
+    flag = info[5]
+    if flag[1] == '0':
         d = datetime.datetime.now()
         week = str(d.weekday())
         if week not in info[2]:
             return
-        if type[2] == '0':
-            itchat.send(u'%s' % (info[4]), contact.getUserName(info[1]))
+        if flag[2] == '0':
+            contact.notifyAll(info[4])
         else:
             recv = robotChat(info[4])
-            itchat.send(u'%s' % (recv), contact.getUserName(info[1]))
-        if type[0] == '0':
+            contact.notifyAll(recv)
+        if flag[0] == '0':
             DB.allDelete(info[0])
-    elif type[1] == '1':
+    elif flag[1] == '1':
         timeStr = time.strftime('%m%d')
         if timeStr != info[2]:
             return
-        if type[2] == '0':
-            itchat.send(u'%s' % (info[4]), contact.getUserName(info[1]))
+        if flag[2] == '0':
+            contact.notifyAll(info[4])
         else:
             recv = robotChat(info[4])
-            itchat.send(u'%s' % (recv), contact.getUserName(info[1]))
-        if type[0] == '0':
+            contact.notifyAll(recv)
+        if flag[0] == '0':
             DB.allDelete(info[0])
         
             

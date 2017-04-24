@@ -4,7 +4,7 @@ from itchat.content import *
 Lock = threading.Lock()
 class contacts(object):
     __instance = None
-    mDict = {}
+    mList = []
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
             try:
@@ -17,16 +17,15 @@ class contacts(object):
     def __init__(self):
         pass
     def getDict(self):
-        try:
-            friends = itchat.get_friends()
-            for i in friends:
-                self.mDict[i[u'Uin']] = i[u'UserName']
-                
+        try:  
             groups = itchat.get_chatrooms()
             for i in groups:
-                self.mDict[i[u'Uin']] = i[u'UserName']
+                self.mList.append(i[u'UserName'])
         except KeyError:
             print 'keyError'
+    def notifyAll(self, strSend):
+        for i in self.mList:
+            itchat.send(u'%s' % (strSend), i)            
     def push(self, wx_id, userName):
         if not self.mDict.has_key(wx_id):
             self.mDict[wx_id] = userName
