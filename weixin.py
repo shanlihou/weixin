@@ -17,12 +17,14 @@ from DBHelper import DBHelper
 from filter import filtHelper
 import datetime
 from guessNumber import guessNumber
+from userHelper import userHelper
 reload(sys)  
 sys.setdefaultencoding('utf8')  
 DB = DBHelper() 
 contact = contacts()
 filt = filtHelper()
 guess = guessNumber()
+users = userHelper()
 def post(data):
     #data=urllib.quote_plus(data)
     url = 'http://60.205.206.18/?signature=58a37c24b16f9f442d8854f44edaf85d0687183b&timestamp=1480424201&nonce=2011091517&openid=o1zOPuInKqVUN-7ILHP49CVEIIzs'
@@ -103,15 +105,24 @@ def groupchat_reply(msg):
                 itchat.send(u'%s' % (filtStr), msg['FromUserName'])
     except KeyError:
         print 'keyError'
+    #print itchat.get_contact(username = msg['ActualUserName'])
     strResp = guess.parse(msg[u'Content'], msg[u'ActualNickName'])
     if strResp:
         itchat.send(u'%s' % (strResp), msg['FromUserName'])  
         return  
     if msg['isAt']:
-        recvMsg = msg['Content'].replace('@鱼塘助手', '').replace(' ', '')
+        recvMsg = msg['Content'].replace('@鱼塘助手', '').replace(' ', '').replace(' ', '')
         recv = robotChat(recvMsg)
         if len(recvMsg) == 4 and len(recv) == 5:
-            
+            score = users.getScore(msg['ActualNickName'])
+            score += 5
+            users.updateScore(msg['ActualNickName'], score)
+            recv += ',回答正确，加5分'
+        elif recv.startswith('你接错了，退出成语接龙模式！'):
+            score = users.getScore(msg['ActualNickName'])
+            score -= 10
+            users.updateScore(msg['ActualNickName'], score)
+            recv += ',扣10分'
         itchat.send(u'%s' % (recv), msg['FromUserName'])
     elif data.startswith('movie '):
         print data
