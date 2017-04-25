@@ -47,6 +47,7 @@ def parseJson(stJson):
                 strRet += parseJson(stJson[key])
     return strRet
 def robotChat(data, id):
+    print 'id:', id
     url='http://openapi.tuling123.com/openapi/api/v2'
     data = data.encode("utf-8")
     data = '{"perception":{"inputText":{"text":"' + data + '"},"selfInfo":{"location":{"city":"杭州","latitude":"30.26","longitude":"120.19","nearest_poi_name":"大华股份","province":"浙江","street":"滨安路"},}},"userInfo":{"apiKey":"bd7514ba69cf46ab9669c07e3a1ce440","userId":'+ str(id) + '}}'
@@ -67,7 +68,7 @@ def robotChat(data, id):
 def text_reply(msg):
     print 'text_reply:' 
     print msg
-    recv = robotChat(msg['Text'])
+    recv = robotChat(msg['Text'], 1)
     print msg['FromUserName']
     itchat.send('%s: %s' % (msg['Type'], recv), msg['FromUserName'])
 
@@ -112,7 +113,7 @@ def groupchat_reply(msg):
         return  
     if msg['isAt']:
         recvMsg = msg['Content'].replace('@鱼塘助手', '').replace(' ', '').replace(' ', '')
-        recv = robotChat(recvMsg, users.getID('ActualUserName'))
+        recv = robotChat(recvMsg, users.getID(msg['FromUserName']))
         if len(recvMsg) == 4 and len(recv) == 5:
             score = users.getScore(msg['ActualNickName'])
             score += 5
@@ -214,7 +215,7 @@ def groupchat_reply(msg):
         print num
         if num == 5:
             recvMsg = msg['Content']
-            recv = robotChat(recvMsg)
+            recv = robotChat(recvMsg, 1)
             itchat.send(u'%s' % (recv), msg['FromUserName'])
             
             
@@ -239,7 +240,7 @@ def notifyAll(info):
         if flag[2] == '0':
             contact.notifyAll(info[4])
         else:
-            recv = robotChat(info[4])
+            recv = robotChat(info[4], 1)
             contact.notifyAll(recv)
         if flag[0] == '0':
             DB.allDelete(info[0])
@@ -250,7 +251,7 @@ def notifyAll(info):
         if flag[2] == '0':
             contact.notifyAll(info[4])
         else:
-            recv = robotChat(info[4])
+            recv = robotChat(info[4], 1)
             contact.notifyAll(recv)
         if flag[0] == '0':
             DB.allDelete(info[0])
@@ -267,10 +268,10 @@ def timeFunc():
             if i[3] == 0:
                 DB.delete(i[0])
         if now.tm_hour == 22 and now.tm_min == 0:
-            recv = robotChat('明天天气怎么样')
+            recv = robotChat('明天天气怎么样', 1)
             notifyMe(recv)
         elif now.tm_hour == 6 and now.tm_min == 30:
-            recv = robotChat('今天天气怎么样')
+            recv = robotChat('今天天气怎么样', 1)
             notifyMe(recv)
         
         result = DB.allQuery(timeStr)

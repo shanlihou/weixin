@@ -39,7 +39,9 @@ class userHelper(object):
     def sort(self):
         return sorted(self.mDict.items(), key = lambda x: x[1], reverse=True)
     def getID(self, name):
+        print name
         if not self.names.has_key(name):
+            print self.id
             self.names[name] = self.id
             self.id += 1
         return self.names[name]
