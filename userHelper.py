@@ -5,6 +5,8 @@ Lock = threading.Lock()
 class userHelper(object):
     __instance = None
     mDict = {}
+    names = {}
+    id = 1
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
             try:
@@ -36,6 +38,10 @@ class userHelper(object):
             self.db.userInsert(username, score)
     def sort(self):
         return sorted(self.mDict.items(), key = lambda x: x[1], reverse=True)
-        
+    def getID(self, name):
+        if not self.names.has_key(name):
+            self.names[name] = self.id
+            self.id += 1
+        return self.names[name]
             
         

@@ -46,10 +46,10 @@ def parseJson(stJson):
             else:
                 strRet += parseJson(stJson[key])
     return strRet
-def robotChat(data):
+def robotChat(data, id):
     url='http://openapi.tuling123.com/openapi/api/v2'
     data = data.encode("utf-8")
-    data = '{"perception":{"inputText":{"text":"' + data + '"},"selfInfo":{"location":{"city":"杭州","latitude":"30.26","longitude":"120.19","nearest_poi_name":"大华股份","province":"浙江","street":"滨安路"},}},"userInfo":{"apiKey":"bd7514ba69cf46ab9669c07e3a1ce440","userId":41234}}'
+    data = '{"perception":{"inputText":{"text":"' + data + '"},"selfInfo":{"location":{"city":"杭州","latitude":"30.26","longitude":"120.19","nearest_poi_name":"大华股份","province":"浙江","street":"滨安路"},}},"userInfo":{"apiKey":"bd7514ba69cf46ab9669c07e3a1ce440","userId":'+ str(id) + '}}'
     req = urllib2.Request(url = url, data = data)
     response = urllib2.urlopen(req)
     resp = response.read()
@@ -112,7 +112,7 @@ def groupchat_reply(msg):
         return  
     if msg['isAt']:
         recvMsg = msg['Content'].replace('@鱼塘助手', '').replace(' ', '').replace(' ', '')
-        recv = robotChat(recvMsg)
+        recv = robotChat(recvMsg, users.getID('ActualUserName'))
         if len(recvMsg) == 4 and len(recv) == 5:
             score = users.getScore(msg['ActualNickName'])
             score += 5
