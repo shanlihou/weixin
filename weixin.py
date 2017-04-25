@@ -108,9 +108,10 @@ def groupchat_reply(msg):
         itchat.send(u'%s' % (strResp), msg['FromUserName'])  
         return  
     if msg['isAt']:
-        lenStr = len(u'@鱼塘助手 ')
-        recvMsg = msg['Content'][lenStr:]
+        recvMsg = msg['Content'].replace('@鱼塘助手', '').replace(' ', '')
         recv = robotChat(recvMsg)
+        if len(recvMsg) == 4 and len(recv) == 5:
+            
         itchat.send(u'%s' % (recv), msg['FromUserName'])
     elif data.startswith('movie '):
         print data
