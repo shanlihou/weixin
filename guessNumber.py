@@ -23,9 +23,8 @@ class guessNumber(object):
         return cls.__instance
     def __init__(self):
         self.users = userHelper()
-    def parse(self, recv, name):
+    def parse(self, recv, name, nickList):
         score = self.users.getScore(name)
-        print recv, name
         if recv == '积分':
             return '你的积分为:%s' % (score)
         elif recv == '排行榜':
@@ -33,6 +32,8 @@ class guessNumber(object):
             dictRet = self.users.sort()
             count = 0
             for i in dictRet:
+                if i[0] not in nickList:
+                    continue
                 count += 1
                 strRet += str(count) + ':' + i[0] + ':' + str(i[1]) + '\n'
             return strRet

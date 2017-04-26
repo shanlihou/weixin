@@ -95,8 +95,12 @@ def add_friend(msg):
 @itchat.msg_register(TEXT, isGroupChat = True)
 def groupchat_reply(msg):
     global DB
+    nickList =[]
     for i in msg['User']['MemberList']:
-        print i['DisplayName'], i['NickName']
+        if i['DisplayName']:
+            nickList.append(i['DisplayName'])
+        else:
+            nickList.append(i['NickName'])
     data = msg['Content'].encode("utf-8")
     print data
     wx_id = 0
@@ -109,7 +113,7 @@ def groupchat_reply(msg):
     except KeyError:
         print 'keyError'
     #print itchat.get_contact(username = msg['ActualUserName'])
-    strResp = guess.parse(msg[u'Content'], msg[u'ActualNickName'])
+    strResp = guess.parse(msg[u'Content'], msg['ActualNickName'], nickList)
     if strResp:
         itchat.send(u'%s' % (strResp), msg['FromUserName'])  
         return  
