@@ -95,6 +95,8 @@ def add_friend(msg):
 @itchat.msg_register(TEXT, isGroupChat = True)
 def groupchat_reply(msg):
     global DB
+    for i in msg['User']['MemberList']:
+        print i['DisplayName'], i['NickName']
     data = msg['Content'].encode("utf-8")
     print data
     wx_id = 0
@@ -116,9 +118,9 @@ def groupchat_reply(msg):
         recv = robotChat(recvMsg, users.getID(msg['FromUserName']))
         if len(recvMsg) == 4 and len(recv) == 5:
             score = users.getScore(msg['ActualNickName'])
-            score += 5
+            score += 10
             users.updateScore(msg['ActualNickName'], score)
-            recv += ',回答正确，加5分'
+            recv += ',回答正确，加10分'
         elif recv.startswith('你接错了，退出成语接龙模式！'):
             score = users.getScore(msg['ActualNickName'])
             score -= 10
