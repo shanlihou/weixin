@@ -1,12 +1,16 @@
+#coding=utf8
 import threading
 from DBHelper import DBHelper
-import string
+import random
+import time
 Lock = threading.Lock()
 class userHelper(object):
     __instance = None
     mDict = {}
     names = {}
     id = 1
+    countDict = {}
+    timeDict = {}
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
             try:
@@ -45,5 +49,34 @@ class userHelper(object):
             self.names[name] = self.id
             self.id += 1
         return self.names[name]
+    def steal(self, name1, name2):
+        if self.countDict.has_key(name1):
+            if self.countDict[name1] == 5:
+                if self.timeDict.has_key(name1):
+                    now = time.time()
+                    if now - self.timeDict[name1] < 3600:
+                        return '冷却中，还有%f秒才能使用' % (3600 + self.timeDict[name1] - now)
+                    else:
+                        self.countDict[name1] = 0
+        else:
+            self.countDict[name1] = 0
+        self.countDict[name1] += 1
+        if self.countDict[name1] == 5:
+            self.timeDict[name1] = time.time()
+        name2 = name2.decode('utf8')
+        score1 = self.getScore(name1)
+        score2 = self.getScore(name2)
+        num = random.randint(1, 5)
+        if num == 1:
+            score1 -= 10
+            self.updateScore(name1, score1)
+            return '偷取失败， 扣10分'
+        num = random.randint(1, 20)
+        score1 += num 
+        score2 -= num
+        self.updateScore(name1, score1)
+        self.updateScore(name2, score2)
+        return '偷取成功，偷到%d分' % num
+        
             
         

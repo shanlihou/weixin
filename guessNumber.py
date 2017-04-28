@@ -44,9 +44,11 @@ class guessNumber(object):
                 return '签到失败'
             else:
                 self.sign[signStr] = 1
-                score += 100
+                num = random.randint(0, 50)
+                score += 100 + num
                 self.users.updateScore(name, score)                
-                return '签到成功,当前分数:%s' % (str(score))
+                return '签到成功,加 %d 分,当前分数:%s' % (num + 100, str(score))
+            
         if recv == '猜数字' and self.state == 0:
             self.state = 1
             self.number = random.randint(0, 999)

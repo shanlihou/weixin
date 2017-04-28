@@ -11,6 +11,7 @@ import time
 import os
 import json
 import random
+import string
 from contacts import contacts
 #from logWeixin import logWeixin
 from DBHelper import DBHelper
@@ -121,10 +122,11 @@ def groupchat_reply(msg):
         recvMsg = msg['Content'].replace('@鱼塘助手', '').replace(' ', '').replace(' ', '')
         recv = robotChat(recvMsg, users.getID(msg['FromUserName']))
         if len(recvMsg) == 4 and len(recv) == 5:
+            num = random.randint(1, 10)
             score = users.getScore(msg['ActualNickName'])
-            score += 10
+            score += num
             users.updateScore(msg['ActualNickName'], score)
-            recv += ',回答正确，加10分'
+            recv += ',回答正确，加%d分,当前%d分' % (num, score)
         elif recv.startswith('你接错了，退出成语接龙模式！'):
             score = users.getScore(msg['ActualNickName'])
             score -= 10
@@ -191,9 +193,12 @@ def groupchat_reply(msg):
         opt = data.split(' ')
         if len(opt) == 3 and len(opt[2]) < 50 and len(opt[1]) < 20:
             if opt[1] == 'delete':
-                filt.delete(opt[2])
-                itchat.send(u'删除成功', msg['FromUserName']) 
-                return 
+                if filt.delete(opt[2]):
+                    itchat.send(u'删除成功', msg['FromUserName']) 
+                    return 
+                else:
+                    itchat.send(u'操作失败', msg['FromUserName']) 
+                    return
             filt.insert(opt[1], opt[2])
             itchat.send(u'添加操作成功', msg['FromUserName']) 
             return 
@@ -215,6 +220,26 @@ def groupchat_reply(msg):
                 DB.allDelete(opt[2])
             itchat.send(u'操作成功', msg['FromUserName']) 
             return 
+        itchat.send(u'操作失败', msg['FromUserName']) 
+    elif data.startswith('steal'):
+        opt = data.split(' ')
+        if len(opt) == 2:
+            if opt[1] in nickList:
+                recv = users.steal(msg['ActualNickName'], opt[1])
+                itchat.send(u'%s' % (recv), msg['FromUserName'])
+                return
+        itchat.send(u'操作失败', msg['FromUserName']) 
+        return  
+    elif data.startswith('set'):   
+        me = itchat.search_friends(remarkName='父母')  
+        if me:
+            for i in me:
+                userName = i['UserName']
+                if userName == msg['ActualUserName']:
+                    opt = data.split(' ')
+                    users.updateScore(opt[1].decode('utf8'), string.atoi(opt[2]))
+                    itchat.send(u'操作成功', msg['FromUserName']) 
+                    return
         itchat.send(u'操作失败', msg['FromUserName']) 
     else:
         num = random.randint(0, 10)

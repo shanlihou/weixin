@@ -40,8 +40,12 @@ class filtHelper(object):
             return self.filtDict[key]
         return None
     def delete(self, key):
-        if self.filtDict.has_key(key):
-            self.filtDict.pop(key)
+        for i in self.filtDict:
+            print type(i), i
+        print type(key), key
+        if self.filtDict.has_key(key.decode('utf8')):
+            print 'enter in'
+            self.filtDict.pop(key.decode('utf8'))
             self.db.filtDelete(key)
             return True
         return False

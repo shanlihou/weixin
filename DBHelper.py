@@ -43,7 +43,16 @@ class DBHelper(object):
         self.conn.commit()       
     def userInsert(self, username, score):
         sql = 'insert user_info(username, score) values(%s, %s)'
+        '''
         print 'insert', username, score
+        strUni = unicode()
+        for i in username:
+            strUni += unichr(ord(i) & 0xffff)
+            print '%x' % ord(i)
+        print strUni
+        for i in strUni:
+            print '%x' % ord(i)
+        '''
         self.cur.execute(sql, (username.encode('utf8'), str(score)))
         self.conn.commit()
         
@@ -84,11 +93,19 @@ class DBHelper(object):
         self.conn.commit()
     def filtDelete(self, key):
         try:
+            '''
+            sql = 'select * from filter where key_ = %s'
+            count = self.cur.execute(sql % (key))
+            result = self.cur.fetchmany(count)
+            print 'result:'
+            for i in result:
+                print i
+            '''
             sql = 'delete from filter where key_ = %s'
             self.cur.execute(sql % (key))
             self.conn.commit()
-        except OperationalError:
-            print 'filtDelete'
+        except OperationalError, e:
+            print OperationalError, e
     def allDelete(self, id):
         sql = 'delete from notify_all where id = %s'
         self.cur.execute(sql % (str(id)))
