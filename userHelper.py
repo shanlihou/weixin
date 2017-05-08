@@ -3,6 +3,7 @@ import threading
 from DBHelper import DBHelper
 import random
 import time
+import string
 Lock = threading.Lock()
 class userHelper(object):
     __instance = None
@@ -24,8 +25,17 @@ class userHelper(object):
         self.db = DBHelper()
         result = self.db.userQuery()
         for i in result:
-            self.mDict[i[0]] = i[1]
+            name = self.db.dataDecode(i[0])
+            self.mDict[name] = i[1]
             
+    def getNickList(self, msg):
+        nickList =[]
+        for i in msg['User']['MemberList']:
+            if i['DisplayName']:
+                nickList.append(i['DisplayName'])
+            else:
+                nickList.append(i['NickName'])
+        return nickList
     def getScore(self, username):
         if self.mDict.has_key(username):
             return self.mDict[username]
@@ -49,6 +59,19 @@ class userHelper(object):
             self.names[name] = self.id
             self.id += 1
         return self.names[name]
+    def give(self, name1, name2, score):
+        name2 = name2.decode('utf8')
+        score1 = self.getScore(name1)
+        score2 = self.getScore(name2)
+        num = string.atoi(score)
+        if num > score1:
+            return '所送分数超过你所能给'
+        score1 -= num 
+        score2 += num
+        self.updateScore(name1, score1)
+        self.updateScore(name2, score2)
+        return 'give成功，give到%d分' % num
+        
     def steal(self, name1, name2):
         if self.countDict.has_key(name1):
             if self.countDict[name1] == 5:
@@ -66,6 +89,9 @@ class userHelper(object):
         name2 = name2.decode('utf8')
         score1 = self.getScore(name1)
         score2 = self.getScore(name2)
+        if score2 < 20:
+            self.countDict[name1] -= 1
+            return '操作失败，不能偷取低于20分的人'
         num = random.randint(1, 5)
         if num == 1:
             score1 -= 10

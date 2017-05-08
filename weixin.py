@@ -12,6 +12,7 @@ import os
 import json
 import random
 import string
+from zzckz import cicy
 from contacts import contacts
 #from logWeixin import logWeixin
 from DBHelper import DBHelper
@@ -19,6 +20,7 @@ from filter import filtHelper
 import datetime
 from guessNumber import guessNumber
 from userHelper import userHelper
+from word import WORD
 reload(sys)  
 sys.setdefaultencoding('utf8')  
 DB = DBHelper() 
@@ -26,6 +28,7 @@ contact = contacts()
 filt = filtHelper()
 guess = guessNumber()
 users = userHelper()
+gWord = WORD()
 def post(data):
     #data=urllib.quote_plus(data)
     url = 'http://60.205.206.18/?signature=58a37c24b16f9f442d8854f44edaf85d0687183b&timestamp=1480424201&nonce=2011091517&openid=o1zOPuInKqVUN-7ILHP49CVEIIzs'
@@ -96,31 +99,13 @@ def add_friend(msg):
 @itchat.msg_register(TEXT, isGroupChat = True)
 def groupchat_reply(msg):
     global DB
-    nickList =[]
-    for i in msg['User']['MemberList']:
-        if i['DisplayName']:
-            nickList.append(i['DisplayName'])
-        else:
-            nickList.append(i['NickName'])
     data = msg['Content'].encode("utf-8")
     print data
     wx_id = 0
-    try:
-        filtStr = filt.filter(msg['Content'])
-        if filtStr:
-            num = random.randint(0, 10)
-            if num < 5:
-                itchat.send(u'%s' % (filtStr), msg['FromUserName'])
-    except KeyError:
-        print 'keyError'
     #print itchat.get_contact(username = msg['ActualUserName'])
-    strResp = guess.parse(msg[u'Content'], msg['ActualNickName'], nickList)
-    if strResp:
-        itchat.send(u'%s' % (strResp), msg['FromUserName'])  
-        return  
     if msg['isAt']:
         recvMsg = msg['Content'].replace('@鱼塘助手', '').replace(' ', '').replace(' ', '')
-        recv = robotChat(recvMsg, users.getID(msg['FromUserName']))
+        recv = robotChat(recvMsg, 100 + users.getID(msg['FromUserName']))
         if len(recvMsg) == 4 and len(recv) == 5:
             num = random.randint(1, 10)
             score = users.getScore(msg['ActualNickName'])
@@ -133,6 +118,7 @@ def groupchat_reply(msg):
             users.updateScore(msg['ActualNickName'], score)
             recv += ',扣10分'
         itchat.send(u'%s' % (recv), msg['FromUserName'])
+        return 
     elif data.startswith('movie '):
         print data
         recv = msg['Content']
@@ -224,8 +210,10 @@ def groupchat_reply(msg):
     elif data.startswith('steal'):
         opt = data.split(' ')
         if len(opt) == 2:
-            if opt[1] in nickList:
-                recv = users.steal(msg['ActualNickName'], opt[1])
+            nickList = users.getNickList(msg)
+            name = opt[1].replace(' ', '')
+            if name in nickList:
+                recv = users.steal(msg['ActualNickName'], name)
                 itchat.send(u'%s' % (recv), msg['FromUserName'])
                 return
         itchat.send(u'操作失败', msg['FromUserName']) 
@@ -241,13 +229,55 @@ def groupchat_reply(msg):
                     itchat.send(u'操作成功', msg['FromUserName']) 
                     return
         itchat.send(u'操作失败', msg['FromUserName']) 
-    else:
-        num = random.randint(0, 10)
-        print num
-        if num == 5:
-            recvMsg = msg['Content']
-            recv = robotChat(recvMsg, 1)
-            itchat.send(u'%s' % (recv), msg['FromUserName'])
+        return
+    elif data.startswith('give'):
+        opt = data.split(' ')
+        if len(opt) == 3:
+            nickList = users.getNickList(msg)
+            name = opt[1].replace(' ', '')
+            print 'enter give'
+            if name in nickList:
+                print 'enter 1'
+                recv = users.give(msg['ActualNickName'], name, opt[2])
+                itchat.send(u'%s' % (recv), msg['FromUserName'])
+                return
+        itchat.send(u'操作失败', msg['FromUserName']) 
+        return  
+    elif data.startswith('word'):
+        opt = data.split(' ')
+        if len(opt) == 2 and opt[1].isalpha():
+            strRet, plus = gWord.checkWord(opt[1]) 
+            itchat.send(u'%s' % strRet, msg['FromUserName'])
+            score = users.getScore(msg['ActualNickName'])
+            score += plus
+            users.updateScore(msg['ActualNickName'], score)
+            return 
+        itchat.send(u'操作失败', msg['FromUserName']) 
+        return
+        
+        
+    
+    strResp = guess.parse(msg[u'Content'], msg['ActualNickName'], msg)
+    if strResp:
+        itchat.send(u'%s' % (strResp), msg['FromUserName'])  
+        return  
+
+    try:
+        filtStr = filt.filter(msg['Content'])
+        if filtStr:
+            num = random.randint(0, 10)
+            if num < 5:
+                itchat.send(u'%s' % (filtStr), msg['FromUserName'])
+                return
+    except KeyError:
+        print 'keyError'
+
+    num = random.randint(0, 20)
+    print num
+    if num == 1:
+        recvMsg = msg['Content']
+        recv = robotChat(recvMsg, 1)
+        itchat.send(u'%s' % (recv), msg['FromUserName'])
             
             
             

@@ -1,7 +1,6 @@
 import urllib2 
 import urllib
 import re
-import sys
 import gzip
 from StringIO import StringIO
 def getUrlList(urlPath):

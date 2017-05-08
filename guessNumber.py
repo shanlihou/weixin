@@ -3,6 +3,7 @@ import threading
 import random
 import string
 import time
+from word import WORD
 from userHelper import userHelper
 Lock = threading.Lock()
 
@@ -23,11 +24,13 @@ class guessNumber(object):
         return cls.__instance
     def __init__(self):
         self.users = userHelper()
-    def parse(self, recv, name, nickList):
+        self.word = WORD()
+    def parse(self, recv, name, msg):
         score = self.users.getScore(name)
         if recv == '积分':
             return '你的积分为:%s' % (score)
         elif recv == '排行榜':
+            nickList = self.users.getNickList(msg)
             strRet = ''
             dictRet = self.users.sort()
             count = 0
@@ -37,6 +40,8 @@ class guessNumber(object):
                 count += 1
                 strRet += str(count) + ':' + i[0] + ':' + str(i[1]) + '\n'
             return strRet
+        elif recv == '猜单词':
+            return self.word.getRandWord()
         elif recv == '签到':
             timeStr = time.strftime('%m%d')
             signStr = name + timeStr
@@ -52,7 +57,7 @@ class guessNumber(object):
         if recv == '猜数字' and self.state == 0:
             self.state = 1
             self.number = random.randint(0, 999)
-            self.count = 0
+            self.count = 10
             return '猜数字开始ʼ'
         elif self.state == 1:
             if recv == '关闭':

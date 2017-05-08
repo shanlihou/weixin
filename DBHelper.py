@@ -27,7 +27,27 @@ class DBHelper(object):
         self.cur.execute('set collation_database=utf8_general_ci;')
         self.cur.execute('set collation_server=utf8_general_ci;')
         self.conn.commit()
-        
+    def dataEncode(self, data):
+        ret = unicode() 
+        for i in data:
+            if ord(i) > 0xffff:
+                ret += '`' + unichr(ord(i) & 0xffff)
+            else:
+                ret += i
+        return ret
+    def dataDecode(self, data):
+        ret = unicode()
+        flag = 0
+        for i in data:
+            if flag == 1:
+                ret += unichr(ord(i) + 0x10000)
+                flag = 0
+                continue
+            if i == '`':
+                flag = 1
+                continue
+            ret += i
+        return ret
     def insert(self, timeStr, info, tType=0):
         sql = 'insert notify(time, info, type) values(%s, %s, %s)'
         print type(tType)
@@ -42,6 +62,11 @@ class DBHelper(object):
         self.cur.execute(sql, (wx_id, date, time, info, type))
         self.conn.commit()       
     def userInsert(self, username, score):
+        for i in username:
+            print '%x' % ord(i)
+        username = self.dataEncode(username)
+        for i in username:
+            print '%x' % ord(i)
         sql = 'insert user_info(username, score) values(%s, %s)'
         '''
         print 'insert', username, score
@@ -76,19 +101,25 @@ class DBHelper(object):
         sql = 'select * from user_info'
         count = self.cur.execute(sql)
         return self.cur.fetchmany(count)
+    def getWordByNum(self, num):
+        sql = 'select * from words where ID = %d'
+        count = self.cur.execute(sql % (num))
+        return self.cur.fetchmany(count)
+        
     
     def filtUpdate(self, key, value):
         sql = "update filter i set i.value = '%s' where i.key_ = '%s'"
         self.cur.execute(sql % (key, value))
         self.conn.commit()
     def userUpdate(self, username, score):
-        sql = "update user_info i set i.score = '%s' where i.username = '%s'"
+        username = self.dataEncode(username)
+        sql = "update user_info i set i.score = %s where i.username = '%s'"
         print sql % (str(score), username)
         self.cur.execute(sql % (str(score), username))
         self.conn.commit()
         
     def delete(self, id):
-        sql = 'delete from notify where id = %s'
+        sql = "delete from notify where id = %s"
         self.cur.execute(sql % (str(id)))
         self.conn.commit()
     def filtDelete(self, key):
@@ -101,7 +132,7 @@ class DBHelper(object):
             for i in result:
                 print i
             '''
-            sql = 'delete from filter where key_ = %s'
+            sql = "delete from filter where key_ = '%s'"
             self.cur.execute(sql % (key))
             self.conn.commit()
         except OperationalError, e:
