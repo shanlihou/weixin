@@ -11,7 +11,6 @@ from guessNumber import guessNumber
 import random
 from gifHelper import gifHelper
 from throwGame import throwGame
-from word import WORD
 '''
 def post(url, data):
     req = urllib2.Request(url)  
@@ -51,14 +50,78 @@ def robotChat(data):
     end = resp.index('"}}]}')
     return resp[start + len(startStr):end]
 #print robotChat('呢')
+db = DBHelper()
+print id(db)
+db.insert('1544', 'nothing')
+db.insert('1544', 'nothing more', 0)
+result = db.query('1544')
+for i in result:
+    print i
+    print type(i)
+    if i[3] == 0:
+        db.delete(i[0])
+output = os.popen('dir')
+tmp = output.read()
+tmpList = [u'name', u'info']
+tmp = u'name'
+print u'%s' % (tmp.decode("gbk"))
+if tmp in tmpList:
+    print 'in'
+else:
+    print 'not in'
+print tmp 
+print type(tmp)
+pre = u'你是谁'
+utf8 = pre.encode('utf8')
+UTF_8 = pre.encode('gbk')
+utf_8 = pre.encode('utf-8')
+print utf8,UTF_8,utf_8
+if utf8 == UTF_8:
+    print '1'
+if utf8 == utf_8:
+    print '2'
+if UTF_8 == utf_8:
+    print '3'
+'''
+filt = filtHelper()
+filt.insert('23', 'ckz是我最敬仰的人')
+filt.insert('我们', '陈科争是我最敬仰的人')
+print filt.get('ckz')
+print filt.get('陈科争')
+print filt.filter('陈科争是个智障')
+result = db.filtQuery()
+print type(result)
+d = datetime.datetime.now()
+print d.weekday()
+print type(d.weekday())
+
+guess = guessNumber()
+print guess.parse('猜数字', '小名')
+for i in range(100):
+    guess.parse(str(random.randint(0,999)), str(random.randint(0, 999)))
+guess.parse('排行榜', 'xiaogmao')
 '''
 gif = gifHelper()
 #gif.parseGif('D:\\tmp\\test.gif')
-gif.parseGif('D:\\load.gif')
+#gif.parseGif('D:\\mie.gif')
+game = throwGame(16)
+img1 = game.createImg()
+gif.createGIF('D:\\box.gif', img1, 256, 256, 0, 0)
+img2, ret = game.throw(45, 70, 10)
+gif.createGIF('D:\\out.gif', img2, 256, 256, 0, 0)
+print ret
+img2, ret = game.throw(60, 90, 25)
+gif.createGIF('D:\\out1.gif', img2, 256, 256, 0, 0)
+print ret
+img2, ret = game.throw(60, 90, 45)
+gif.createGIF('D:\\out1.gif', img2, 256, 256, 0, 0)
+print ret
+img2, ret = game.throw(60, 90, 80)
+gif.createGIF('D:\\out1.gif', img2, 256, 256, 0, 0)
+print ret
 
-img = throwGame().throw()
-gif.createGIF('D:\\out.gif', img, 256, 256, 0, 0)
-'''
-word = WORD()
-WORD.getTrans('apple')
-word.getRandom()
+img2, ret = game.throw(60, 90, 127)
+gif.createGIF('D:\\out1.gif', img2, 256, 256, 0, 0)
+print ret
+
+

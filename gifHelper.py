@@ -111,7 +111,7 @@ class gifHelper(object):
         output = ''
         cur = self.fFetch(fRead, RunningBits)
         while cur != EOFCode:
-            if cur == 32:
+            if cur == ClearCode:
                 pre = 0
                 RunningCode = EOFCode + 1
                 RunningBits = BitsPerPixel + 1
@@ -127,6 +127,7 @@ class gifHelper(object):
                 #print pre, cur, RunningCode, RunningBits
                 dictCode[RunningCode - 1] = pre + dictCode[cur][0]
             pre = dictCode[cur]
+            print pre, cur, RunningCode, RunningBits
             output += pre
             RunningCode += 1
             cur = self.fFetch(fRead, RunningBits)
@@ -138,11 +139,14 @@ class gifHelper(object):
 
         strPrint = ''
         for i in output:
-            strPrint += '%x ' % ord(i)
+            if ord(i) == 0xfb:
+                strPrint += '%d ,' % 0
+            else:
+                strPrint += '%d ,' % 1
         print strPrint
         #test start
-        enc = lzw(5, output)
-        enc.encode()
+        #enc = lzw(5, output)
+        #enc.encode()
         #test end
         return fRead.read(1)
     def parseFlag(self, fRead):
@@ -206,7 +210,7 @@ class gifHelper(object):
         strWrite = ''
         strWrite += chr(delayTime % 256)
         strWrite += chr(delayTime / 256)
-        strWrite += chr(2)
+        strWrite += chr(7)
         strWrite += chr(0)
         self.fileWrite.write(strWrite)
         
@@ -226,13 +230,11 @@ class gifHelper(object):
         self.fileWrite.write(strWrite)
         
         #write
-        self.fileWrite.write(chr(3))
-        enc = lzw(3, data)
+        self.fileWrite.write(chr(4))
+        enc = lzw(4, data)
         strEncode = enc.encode()
         wholeLen = len(strEncode)
         wLen = 0
-        count = 0
-        print 'whole:', wholeLen
         while wLen < wholeLen:
             if wholeLen - wLen > 255:
                 self.fileWrite.write(chr(255))
@@ -263,8 +265,32 @@ class gifHelper(object):
         #write rgb
         self.fileWrite.write(chr(0xff) * 3)
         self.fileWrite.write(chr(0x99) * 3)
-        self.fileWrite.write(chr(0) * 3 * (8 - 2))
+        #write 2:red
+        self.fileWrite.write(chr(0xff))
+        self.fileWrite.write(chr(0))
+        self.fileWrite.write(chr(0))
+        #write 3:brown
+        self.fileWrite.write(chr(128))
+        self.fileWrite.write(chr(64))
+        self.fileWrite.write(chr(64))
+        #write 4:green
+        self.fileWrite.write(chr(128))
+        self.fileWrite.write(chr(0xff))
+        self.fileWrite.write(chr(128))
+        #write 5:blue
+        self.fileWrite.write(chr(0))
+        self.fileWrite.write(chr(128))
+        self.fileWrite.write(chr(255))
+        #write 6:pink
+        self.fileWrite.write(chr(255))
+        self.fileWrite.write(chr(128))
+        self.fileWrite.write(chr(255))
+        #write 7:purple
+        self.fileWrite.write(chr(64))
+        self.fileWrite.write(chr(0))
+        self.fileWrite.write(chr(128))
         
         for i in imgList:
             self.insertFrame(i, 7)
         self.fileWrite.write(';')
+        self.fileWrite.close()

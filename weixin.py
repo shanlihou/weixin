@@ -17,10 +17,14 @@ from contacts import contacts
 #from logWeixin import logWeixin
 from DBHelper import DBHelper
 from filter import filtHelper
+from throwGame import throwGame
+from gifHelper import gifHelper
 import datetime
 from guessNumber import guessNumber
 from userHelper import userHelper
 from word import WORD
+import threading
+Lock = threading.Lock()
 reload(sys)  
 sys.setdefaultencoding('utf8')  
 DB = DBHelper() 
@@ -29,6 +33,8 @@ filt = filtHelper()
 guess = guessNumber()
 users = userHelper()
 gWord = WORD()
+gif = gifHelper()
+brain = None
 def post(data):
     #data=urllib.quote_plus(data)
     url = 'http://60.205.206.18/?signature=58a37c24b16f9f442d8854f44edaf85d0687183b&timestamp=1480424201&nonce=2011091517&openid=o1zOPuInKqVUN-7ILHP49CVEIIzs'
@@ -101,6 +107,7 @@ def groupchat_reply(msg):
     global DB
     data = msg['Content'].encode("utf-8")
     print data
+    #itchat.get_head_img(userName = msg['ActualUserName'], picDir = '1.gif')
     wx_id = 0
     #print itchat.get_contact(username = msg['ActualUserName'])
     if msg['isAt']:
@@ -247,14 +254,60 @@ def groupchat_reply(msg):
         opt = data.split(' ')
         if len(opt) == 2 and opt[1].isalpha():
             strRet, plus = gWord.checkWord(opt[1]) 
-            itchat.send(u'%s' % strRet, msg['FromUserName'])
             score = users.getScore(msg['ActualNickName'])
             score += plus
             users.updateScore(msg['ActualNickName'], score)
+            itchat.send(u'%s' % strRet, msg['FromUserName'])
             return 
         itchat.send(u'操作失败', msg['FromUserName']) 
         return
-        
+    elif data.startswith('throw'):
+        global brain
+        if not brain:
+            itchat.send(u'游戏未开始', msg['FromUserName']) 
+            return     
+        opt = data.split(' ')
+        if len(opt) == 4 and opt[1].isdigit() and opt[2].isdigit() and opt[3].isdigit():
+            angle = string.atoi(opt[1])
+            fire = string.atoi(opt[2])
+            offset = string.atoi(opt[3])
+            if angle > 80 or angle < 0 or fire < 0 or fire > 100 or offset < 0 or offset > 127:
+                itchat.send(u'角度1-79， 火力1-100， 位移1-127，而你不符合规范', msg['FromUserName']) 
+                return 
+            Lock.acquire()
+            img, ret = brain.throw(string.atoi(opt[1]), string.atoi(opt[2]), string.atoi(opt[3]))
+            gif.createGIF('throw.gif', img, 256, 256, 0, 0)
+            itchat.send_image('throw.gif', msg['FromUserName'])
+            score = users.getScore(msg['ActualNickName'])
+            print type(ret)
+            if ret == 0:
+                score += 20
+                brain = None
+                itchat.send(u'击中目标，加20分', msg['FromUserName'])
+            elif ret == 2:
+                score -= 10
+                brain = None
+                itchat.send(u'次数用尽，扣10分', msg['FromUserName'])                  
+            else:
+                score -= 10
+                itchat.send(u'脱靶，扣10分', msg['FromUserName']) 
+            users.updateScore(msg['ActualNickName'], score)    
+            Lock.release()               
+            return
+        itchat.send(u'操作失败', msg['FromUserName']) 
+        return 
+    elif msg[u'Content'] == '愤怒的小脑':
+        Lock.acquire()
+        global brain
+        brain = throwGame(16)
+        img = brain.createImg()
+        for i in img:
+            print 'i:', len(i)
+        gif.createGIF('brain.gif', img, 256, 256, 0, 0)
+        ret = itchat.send_image('brain.gif', msg['FromUserName'])
+        itchat.send(u'游戏开始请输入:throw angle fire offset\n角度 火力 位移，如:throw 25 90 10', msg['FromUserName']) 
+        Lock.release()
+        return
         
     
     strResp = guess.parse(msg[u'Content'], msg['ActualNickName'], msg)
@@ -277,8 +330,7 @@ def groupchat_reply(msg):
     if num == 1:
         recvMsg = msg['Content']
         recv = robotChat(recvMsg, 1)
-        itchat.send(u'%s' % (recv), msg['FromUserName'])
-            
+        itchat.send(u'%s' % (recv), msg['FromUserName'])           
             
             
                     
