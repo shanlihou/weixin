@@ -107,7 +107,7 @@ def groupchat_reply(msg):
     global DB
     data = msg['Content'].encode("utf-8")
     print data
-    users.getNickList(msg)
+    nickList, nickName = users.getNickList(msg)
     #itchat.get_head_img(userName = msg['ActualUserName'], picDir = '1.gif')
     wx_id = 0
     #print itchat.get_contact(username = msg['ActualUserName'])

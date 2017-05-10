@@ -30,13 +30,13 @@ class userHelper(object):
             
     def getNickList(self, msg):
         nickList =[]
+        username = msg['ActualUserName']
+        nickName = ''
         for i in msg['User']['MemberList']:
-            print i
-            if i['DisplayName']:
-                nickList.append(i['DisplayName'])
-            else:
-                nickList.append(i['NickName'])
-        return nickList
+            if i['UserName'] == username:
+                nickName = i['NickName']
+            nickList.append(i['NickName'])
+        return nickList, nickName
     def getScore(self, username):
         if self.mDict.has_key(username):
             return self.mDict[username]
