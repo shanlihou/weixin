@@ -107,6 +107,7 @@ def groupchat_reply(msg):
     global DB
     data = msg['Content'].encode("utf-8")
     print data
+    users.getNickList(msg)
     #itchat.get_head_img(userName = msg['ActualUserName'], picDir = '1.gif')
     wx_id = 0
     #print itchat.get_contact(username = msg['ActualUserName'])
@@ -283,7 +284,7 @@ def groupchat_reply(msg):
             if ret == 0:
                 score += 20
                 brain = None
-                itchat.send(u'击中目标，加20分', msg['FromUserName'])
+                itchat.send(u'击中目标，加20分,游戏结束', msg['FromUserName'])
             elif ret == 2:
                 score -= 10
                 brain = None
@@ -293,6 +294,25 @@ def groupchat_reply(msg):
                 itchat.send(u'脱靶，扣10分', msg['FromUserName']) 
             users.updateScore(msg['ActualNickName'], score)    
             Lock.release()               
+            return
+        itchat.send(u'操作失败', msg['FromUserName']) 
+        return 
+    elif data.startswith('bet'):
+        opt = data.split(' ')
+        if len(opt) == 2 and opt[1].isdigit():
+            score = users.getScore(msg['ActualNickName'])
+            value = string.atoi(opt[1])
+            if value > score:
+                itchat.send(u'你就没这多钱，还想下注，做梦呢？', msg['FromUserName'])    
+                return
+            ran = random.randint(1, 100)
+            if ran < 51:
+                score += value
+                itchat.send(u'恭喜你，压中了，当前积分:%d' % score, msg['FromUserName']) 
+            else:
+                score -= value   
+                itchat.send(u'押注失败，当前积分:%d' % score, msg['FromUserName']) 
+            users.updateScore(msg['ActualNickName'], score)    
             return
         itchat.send(u'操作失败', msg['FromUserName']) 
         return 

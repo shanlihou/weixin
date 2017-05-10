@@ -11,6 +11,7 @@ from guessNumber import guessNumber
 import random
 from gifHelper import gifHelper
 from throwGame import throwGame
+from wolf import wolf
 '''
 def post(url, data):
     req = urllib2.Request(url)  
@@ -101,6 +102,7 @@ for i in range(100):
     guess.parse(str(random.randint(0,999)), str(random.randint(0, 999)))
 guess.parse('排行榜', 'xiaogmao')
 '''
+'''
 gif = gifHelper()
 #gif.parseGif('D:\\tmp\\test.gif')
 #gif.parseGif('D:\\mie.gif')
@@ -123,5 +125,6 @@ print ret
 img2, ret = game.throw(60, 90, 127)
 gif.createGIF('D:\\out1.gif', img2, 256, 256, 0, 0)
 print ret
-
-
+'''
+wolves = wolf()
+wolves.getCurWeek()

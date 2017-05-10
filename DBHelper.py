@@ -23,6 +23,7 @@ class DBHelper(object):
         self.cur.execute("create table if not exists filter(key_ varchar(20), value varchar(50), PRIMARY KEY (key_))")
         self.cur.execute("create table if not exists notify_all(id int NOT NULL AUTO_INCREMENT, wx_id varchar(40), date varchar(20), time varchar(20), info varchar(50), type varchar(8), PRIMARY KEY (id))")
         self.cur.execute("create table if not exists user_info(username varchar(50), score int, PRIMARY KEY (username))")
+        self.cur.execute("create table if not exists wolf(id int NOT NULL AUTO_INCREMENT, name varchar(50), time varchar(20), PRIMARY KEY (id))")
         #type 0: times, 1: week or date, 2: reverse or not
         self.cur.execute('set collation_database=utf8_general_ci;')
         self.cur.execute('set collation_server=utf8_general_ci;')
@@ -68,17 +69,12 @@ class DBHelper(object):
         for i in username:
             print '%x' % ord(i)
         sql = 'insert user_info(username, score) values(%s, %s)'
-        '''
-        print 'insert', username, score
-        strUni = unicode()
-        for i in username:
-            strUni += unichr(ord(i) & 0xffff)
-            print '%x' % ord(i)
-        print strUni
-        for i in strUni:
-            print '%x' % ord(i)
-        '''
         self.cur.execute(sql, (username.encode('utf8'), str(score)))
+        self.conn.commit()       
+    def wolfInsert(self, name, time):
+        name = self.dataEncode(name)
+        sql = 'insert wolf(name, time) values(%s, %s)'
+        self.cur.execute(sql, (name.encode('utf8'), time))
         self.conn.commit()
         
         
@@ -101,11 +97,15 @@ class DBHelper(object):
         sql = 'select * from user_info'
         count = self.cur.execute(sql)
         return self.cur.fetchmany(count)
+    def wolfQuery(self):
+        sql = 'select * from wolf'
+        count = self.cur.execute(sql)
+        return self.cur.fetchmany(count)
     def getWordByNum(self, num):
         sql = 'select * from words where ID = %d'
         count = self.cur.execute(sql % (num))
         return self.cur.fetchmany(count)
-        
+       
     
     def filtUpdate(self, key, value):
         sql = "update filter i set i.value = '%s' where i.key_ = '%s'"
@@ -116,6 +116,11 @@ class DBHelper(object):
         sql = "update user_info i set i.score = %s where i.username = '%s'"
         print sql % (str(score), username)
         self.cur.execute(sql % (str(score), username))
+        self.conn.commit()
+    def wolfUpdate(self, name, time):
+        username = self.dataEncode(name)
+        sql = "update wolf i set i.time = %s where i.name = '%s'"
+        self.cur.execute(sql % (time, name))
         self.conn.commit()
         
     def delete(self, id):

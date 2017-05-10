@@ -31,6 +31,7 @@ class userHelper(object):
     def getNickList(self, msg):
         nickList =[]
         for i in msg['User']['MemberList']:
+            print i
             if i['DisplayName']:
                 nickList.append(i['DisplayName'])
             else:
