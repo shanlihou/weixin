@@ -12,6 +12,9 @@ import random
 from gifHelper import gifHelper
 from throwGame import throwGame
 from wolf import wolf
+from plane import plane
+from readData import readData
+from planeHelper import planeHelper
 '''
 def post(url, data):
     req = urllib2.Request(url)  
@@ -128,3 +131,53 @@ print ret
 '''
 wolves = wolf()
 wolves.getCurWeek()
+
+gif = gifHelper()
+#gif.parseGif('D:\\4.gif')
+
+#game = plane()
+'''
+img = [game.createFrame()]
+for i in range(20):
+    print game.getRan()
+    game.goChess(0)
+    img.append(game.createFrame())
+gif.createGIF('D:\\box.gif', img, 256, 256, 0, 0)
+'''
+'''
+img = []
+for i in range(20):
+    game.getRan()
+    img.extend(game.goChess(0))
+print len(img)
+gif.createGIF('D:\\box.gif', img, 256, 256, 0, 0)
+'''
+planeGame = planeHelper()
+img, strPrint = planeGame.parse('飞行棋', '1')
+img, strPrint = planeGame.parse('飞行棋', '2')
+img, strPrint = planeGame.parse('飞行棋开始', '2')
+print strPrint
+'''
+for i in range(40):
+    if i % 2 == 0:
+        img, strPrint = planeGame.parse('fly', '1')
+    else:
+        img, strPrint = planeGame.parse('fly', '2')         
+    if img:
+        gif.createGIF('D:\\box%d.gif' % i, img, 256, 256, 0, 0)
+    if strPrint:
+        print strPrint
+'''
+while 1:
+    #strRet = raw_input("Enter your input: ")
+    name = raw_input("name: ")
+    #print strRet
+    print name
+    img, strPrint = planeGame.parse('fly', name)
+    if img:
+        gif.createGIF('D:\\box.gif', img, 256, 256, 0, 0)
+    if strPrint:
+        print strPrint
+
+#getData = readData()
+#getData.read('D:\\tmp\\Core\\weixin-master\\weixin-master\\plane.txt')

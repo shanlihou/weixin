@@ -40,13 +40,13 @@ class gifHelper(object):
             if mid + use > num:
                 mid = num - use
                 left = 8 - right - mid
-            print left, mid, right, self.get2(self.curByte), use, ret
+            #print left, mid, right, self.get2(self.curByte), use, ret
             ret = (((self.curByte & self.masks[right + mid] & (~self.masks[right])) >> right) << use) + ret
             self.bit = right + mid
             if self.bit == 8:
                 self.bit = 0
             use += mid
-        print 'ret:', ret
+        #print 'ret:', ret
         return ret
 
     def parseFF(self, fRead):
@@ -89,6 +89,14 @@ class gifHelper(object):
         print ord(tmp[4]) + ord(tmp[5]) * 256
         print ord(tmp[6]) + ord(tmp[7]) * 256
         print self.get2(ord(tmp[8]))
+        
+        pixel = ord(tmp[8]) & 0x7
+        pixel_size = int(math.pow(2, pixel + 1))
+        m = ord(tmp[8]) & 0x80
+        print 'pixel', pixel_size
+        if m == 0x80:
+            tmp = fRead.read(3 * pixel_size)
+             
         self.bit = 0
         BitsPerPixel = ord(fRead.read(1))
         ClearCode = int(math.pow(2, BitsPerPixel))
@@ -127,7 +135,7 @@ class gifHelper(object):
                 #print pre, cur, RunningCode, RunningBits
                 dictCode[RunningCode - 1] = pre + dictCode[cur][0]
             pre = dictCode[cur]
-            print pre, cur, RunningCode, RunningBits
+            #print pre, cur, RunningCode, RunningBits
             output += pre
             RunningCode += 1
             cur = self.fFetch(fRead, RunningBits)
@@ -140,9 +148,9 @@ class gifHelper(object):
         strPrint = ''
         for i in output:
             if ord(i) == 0xfb:
-                strPrint += '%d ,' % 0
+                strPrint += '%d, ' % 0
             else:
-                strPrint += '%d ,' % 1
+                strPrint += '%d, ' % 1
         print strPrint
         #test start
         #enc = lzw(5, output)
@@ -185,20 +193,22 @@ class gifHelper(object):
             print self.get2(ord(i))
         pixel = ord(tmp[4]) & 0x7
         pixel_size = int(math.pow(2, pixel + 1))
+        m = ord(tmp[4]) & 0x80
         print 'pixel', pixel_size
         self.count += 7
         print 'count:', '%x' % self.count
-        tmp = fileRead.read(3 * pixel_size)
-        index_ = tmp.find(',')
-        while index_ != -1:
-            print 'index:', index_
-            index_tmp = tmp[index_+1:].find(',')
-            if index_tmp == -1:
-                break
-            index_ += 1 + index_tmp
-        self.count += 3 * pixel_size
-        print 'count:', '%x' % self.count
-        print fileRead.tell()
+        if m == 0x80:
+            tmp = fileRead.read(3 * pixel_size)
+            index_ = tmp.find(',')
+            while index_ != -1:
+                print 'index:', index_
+                index_tmp = tmp[index_+1:].find(',')
+                if index_tmp == -1:
+                    break
+                index_ += 1 + index_tmp
+            self.count += 3 * pixel_size
+            print 'count:', '%x' % self.count
+            print fileRead.tell()
         self.parseFlag(fileRead)
     
     def insertFrame(self, data, delayTime):
@@ -262,21 +272,26 @@ class gifHelper(object):
         strWrite += chr(0)
         strWrite += chr(0)
         self.fileWrite.write(strWrite)
-        #write rgb
-        self.fileWrite.write(chr(0xff) * 3)
-        self.fileWrite.write(chr(0x99) * 3)
+        #write 0
+        self.fileWrite.write(chr(0xf7))
+        self.fileWrite.write(chr(0xe9))
+        self.fileWrite.write(chr(0xba))
+        #write 1:red
+        self.fileWrite.write(chr(0xea))
+        self.fileWrite.write(chr(0x21))
+        self.fileWrite.write(chr(0x19))
         #write 2:red
         self.fileWrite.write(chr(0xff))
-        self.fileWrite.write(chr(0))
-        self.fileWrite.write(chr(0))
+        self.fileWrite.write(chr(0xae))
+        self.fileWrite.write(chr(0x10))
         #write 3:brown
-        self.fileWrite.write(chr(128))
-        self.fileWrite.write(chr(64))
-        self.fileWrite.write(chr(64))
+        self.fileWrite.write(chr(0x06))
+        self.fileWrite.write(chr(0x86))
+        self.fileWrite.write(chr(0x4d))
         #write 4:green
-        self.fileWrite.write(chr(128))
-        self.fileWrite.write(chr(0xff))
-        self.fileWrite.write(chr(128))
+        self.fileWrite.write(chr(0x25))
+        self.fileWrite.write(chr(0x86))
+        self.fileWrite.write(chr(0xe4))
         #write 5:blue
         self.fileWrite.write(chr(0))
         self.fileWrite.write(chr(128))
@@ -291,6 +306,6 @@ class gifHelper(object):
         self.fileWrite.write(chr(128))
         
         for i in imgList:
-            self.insertFrame(i, 7)
+            self.insertFrame(i, 50)
         self.fileWrite.write(';')
         self.fileWrite.close()

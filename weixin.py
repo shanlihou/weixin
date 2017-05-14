@@ -24,6 +24,7 @@ from guessNumber import guessNumber
 from userHelper import userHelper
 from word import WORD
 import threading
+from planeHelper import planeHelper
 Lock = threading.Lock()
 reload(sys)  
 sys.setdefaultencoding('utf8')  
@@ -36,6 +37,7 @@ gWord = WORD()
 gif = gifHelper()
 brain = None
 ran = random.randint(1, 100)
+planeGame = planeHelper()
 def post(data):
     #data=urllib.quote_plus(data)
     url = 'http://60.205.206.18/?signature=58a37c24b16f9f442d8854f44edaf85d0687183b&timestamp=1480424201&nonce=2011091517&openid=o1zOPuInKqVUN-7ILHP49CVEIIzs'
@@ -328,6 +330,30 @@ def groupchat_reply(msg):
             users.updateScore(nickName, score)    
             users.updateScore(u'鱼塘助手', son)  
             return
+        elif len(opt) == 3 and opt[2].isdigit():
+            value = string.atoi(opt[2])
+            name = opt[1].replace(' ', '')
+            score = users.getScore(nickName)
+            he = users.getScore(name.decode('utf8'))
+            if value > score or value > he:
+                itchat.send(u'抱歉，你或他没有这么多分？', msg['FromUserName'])    
+                return
+            if name not in nickList:
+                itchat.send(u'此人不存在，你还想跟他对赌', msg['FromUserName'])
+                return
+            
+            if ran < 51:
+                score += value
+                he -= value
+                itchat.send(u'恭喜你，赢了，当前积分:%d' % score, msg['FromUserName']) 
+            else:
+                score -= value   
+                he += value
+                itchat.send(u'你输了，当前积分:%d' % score, msg['FromUserName']) 
+            ran = random.randint(1, 100)
+            users.updateScore(nickName, score)    
+            users.updateScore(name.decode('utf8'), he)  
+            return
         itchat.send(u'操作失败', msg['FromUserName']) 
         return 
     elif msg[u'Content'] == 'get':
@@ -338,14 +364,20 @@ def groupchat_reply(msg):
         global brain
         brain = throwGame(16)
         img = brain.createImg()
-        for i in img:
-            print 'i:', len(i)
         gif.createGIF('brain.gif', img, 256, 256, 0, 0)
         ret = itchat.send_image('brain.gif', msg['FromUserName'])
         itchat.send(u'游戏开始请输入:throw angle fire offset\n角度 火力 位移，如:throw 25 90 10', msg['FromUserName']) 
         Lock.release()
         return
-        
+    img, strResp = planeGame.parse(data, msg['ActualNickName'])
+    if strResp:
+        if img:
+            Lock.acquire()
+            gif.createGIF('plane.gif', img, 256, 256, 0, 0)
+            ret = itchat.send_image('plane.gif', msg['FromUserName'])
+            Lock.release()
+        itchat.send(u'%s' % strResp, msg['FromUserName'])    
+        return
     
     strResp = guess.parse(msg[u'Content'], nickName, msg)
     if strResp:

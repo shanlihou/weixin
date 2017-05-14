@@ -25,7 +25,7 @@ class WORD(object):
         url='http://dict.youdao.com/w/eng/' + word
         resp = urllib2.urlopen(url)
         html = resp.read()
-        indexTrans = html.find('trans-container')
+        indexTrans = html.find('"trans-container"')
         if indexTrans != -1:
             start = indexTrans + html[indexTrans:].find('<li>')
             end = indexTrans + html[indexTrans:].find('</li>')
