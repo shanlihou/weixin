@@ -35,6 +35,7 @@ users = userHelper()
 gWord = WORD()
 gif = gifHelper()
 brain = None
+ran = random.randint(1, 100)
 def post(data):
     #data=urllib.quote_plus(data)
     url = 'http://60.205.206.18/?signature=58a37c24b16f9f442d8854f44edaf85d0687183b&timestamp=1480424201&nonce=2011091517&openid=o1zOPuInKqVUN-7ILHP49CVEIIzs'
@@ -114,17 +115,19 @@ def groupchat_reply(msg):
     if msg['isAt']:
         recvMsg = msg['Content'].replace('@鱼塘助手', '').replace(' ', '').replace(' ', '')
         recv = robotChat(recvMsg, 100 + users.getID(msg['FromUserName']))
+        score = users.getScore(nickName)
+        son = users.getScore(u'鱼塘助手')
         if len(recvMsg) == 4 and len(recv) == 5:
             num = random.randint(1, 10)
-            score = users.getScore(msg['ActualNickName'])
             score += num
-            users.updateScore(msg['ActualNickName'], score)
+            son -= num      
             recv += ',回答正确，加%d分,当前%d分' % (num, score)
         elif recv.startswith('你接错了，退出成语接龙模式！'):
-            score = users.getScore(msg['ActualNickName'])
             score -= 10
-            users.updateScore(msg['ActualNickName'], score)
+            son += 10
             recv += ',扣10分'
+        users.updateScore(nickName, score)
+        users.updateScore(u'鱼塘助手', son)     
         itchat.send(u'%s' % (recv), msg['FromUserName'])
         return 
     elif data.startswith('movie '):
@@ -218,10 +221,9 @@ def groupchat_reply(msg):
     elif data.startswith('steal'):
         opt = data.split(' ')
         if len(opt) == 2:
-            nickList = users.getNickList(msg)
             name = opt[1].replace(' ', '')
             if name in nickList:
-                recv = users.steal(msg['ActualNickName'], name)
+                recv = users.steal(nickName, name)
                 itchat.send(u'%s' % (recv), msg['FromUserName'])
                 return
         itchat.send(u'操作失败', msg['FromUserName']) 
@@ -241,12 +243,11 @@ def groupchat_reply(msg):
     elif data.startswith('give'):
         opt = data.split(' ')
         if len(opt) == 3:
-            nickList = users.getNickList(msg)
             name = opt[1].replace(' ', '')
             print 'enter give'
             if name in nickList:
                 print 'enter 1'
-                recv = users.give(msg['ActualNickName'], name, opt[2])
+                recv = users.give(nickName, name, opt[2])
                 itchat.send(u'%s' % (recv), msg['FromUserName'])
                 return
         itchat.send(u'操作失败', msg['FromUserName']) 
@@ -255,9 +256,12 @@ def groupchat_reply(msg):
         opt = data.split(' ')
         if len(opt) == 2 and opt[1].isalpha():
             strRet, plus = gWord.checkWord(opt[1]) 
-            score = users.getScore(msg['ActualNickName'])
+            score = users.getScore(nickName)
+            son = users.getScore(u'鱼塘助手')
             score += plus
-            users.updateScore(msg['ActualNickName'], score)
+            son -= plus
+            users.updateScore(nickName, score)
+            users.updateScore(u'鱼塘助手', son)
             itchat.send(u'%s' % strRet, msg['FromUserName'])
             return 
         itchat.send(u'操作失败', msg['FromUserName']) 
@@ -279,43 +283,56 @@ def groupchat_reply(msg):
             img, ret = brain.throw(string.atoi(opt[1]), string.atoi(opt[2]), string.atoi(opt[3]))
             gif.createGIF('throw.gif', img, 256, 256, 0, 0)
             itchat.send_image('throw.gif', msg['FromUserName'])
-            score = users.getScore(msg['ActualNickName'])
+            score = users.getScore(nickName)
+            son = users.getScore(u'鱼塘助手')
             print type(ret)
             if ret == 0:
                 score += 20
+                son -= 20
                 brain = None
                 itchat.send(u'击中目标，加20分,游戏结束', msg['FromUserName'])
             elif ret == 2:
                 score -= 10
+                son += 10
                 brain = None
                 itchat.send(u'次数用尽，扣10分', msg['FromUserName'])                  
             else:
+                son += 10
                 score -= 10
                 itchat.send(u'脱靶，扣10分', msg['FromUserName']) 
-            users.updateScore(msg['ActualNickName'], score)    
+            users.updateScore(u'鱼塘助手', son)
+            users.updateScore(nickName, score)    
             Lock.release()               
             return
         itchat.send(u'操作失败', msg['FromUserName']) 
         return 
     elif data.startswith('bet'):
+        global ran
         opt = data.split(' ')
         if len(opt) == 2 and opt[1].isdigit():
-            score = users.getScore(msg['ActualNickName'])
+            score = users.getScore(nickName)
+            son = users.getScore(u'鱼塘助手')
             value = string.atoi(opt[1])
             if value > score:
                 itchat.send(u'你就没这多钱，还想下注，做梦呢？', msg['FromUserName'])    
                 return
-            ran = random.randint(1, 100)
             if ran < 51:
                 score += value
+                son -= value
                 itchat.send(u'恭喜你，压中了，当前积分:%d' % score, msg['FromUserName']) 
             else:
                 score -= value   
+                son += value
                 itchat.send(u'押注失败，当前积分:%d' % score, msg['FromUserName']) 
-            users.updateScore(msg['ActualNickName'], score)    
+            ran = random.randint(1, 100)
+            users.updateScore(nickName, score)    
+            users.updateScore(u'鱼塘助手', son)  
             return
         itchat.send(u'操作失败', msg['FromUserName']) 
         return 
+    elif msg[u'Content'] == 'get':
+        itchat.send(u'%d' % ran, msg['FromUserName']) 
+        return
     elif msg[u'Content'] == '愤怒的小脑':
         Lock.acquire()
         global brain
@@ -330,7 +347,7 @@ def groupchat_reply(msg):
         return
         
     
-    strResp = guess.parse(msg[u'Content'], msg['ActualNickName'], msg)
+    strResp = guess.parse(msg[u'Content'], nickName, msg)
     if strResp:
         itchat.send(u'%s' % (strResp), msg['FromUserName'])  
         return  

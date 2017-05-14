@@ -13,6 +13,7 @@ class guessNumber(object):
     number = 0
     count = 0
     sign = {}
+    groupSign = {}
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
             try:
@@ -25,12 +26,22 @@ class guessNumber(object):
     def __init__(self):
         self.users = userHelper()
         self.word = WORD()
+    def isSign(self, groupName, times):
+        if not self.groupSign.has_key(groupName):
+            self.groupSign[groupName] = times * 3 / 2
+        if self.groupSign[groupName] <= 0:
+            return False
+        print 'sign times:', self.groupSign[groupName]
+        self.groupSign[groupName] -= 1
+        print self.groupSign[groupName]
+        return True
     def parse(self, recv, name, msg):
+        print name
         score = self.users.getScore(name)
         if recv == '积分':
             return '你的积分为:%s' % (score)
         elif recv == '排行榜':
-            nickList = self.users.getNickList(msg)
+            nickList, nothing = self.users.getNickList(msg)
             strRet = ''
             dictRet = self.users.sort()
             count = 0
@@ -47,13 +58,19 @@ class guessNumber(object):
             signStr = name + timeStr
             if self.sign.has_key(signStr):
                 return '签到失败'
-            else:
-                self.sign[signStr] = 1
-                num = random.randint(0, 50)
-                score += 100 + num
-                self.users.updateScore(name, score)                
-                return '签到成功,加 %d 分,当前分数:%s' % (num + 100, str(score))
+            if not self.isSign(msg['FromUserName'] + timeStr, len(msg['User']['MemberList'])):
+                return '超过本群最大签到次数'
             
+            self.sign[signStr] = 1
+            num = random.randint(0, 50)
+            score += 100 + num
+            self.users.updateScore(name, score)
+            
+            son = self.users.getScore(u'鱼塘助手')
+            son -= 100 + num      
+            self.users.updateScore(u'鱼塘助手', son)          
+            return '签到成功,加 %d 分,当前分数:%s' % (num + 100, str(score))
+        
         if recv == '猜数字' and self.state == 0:
             self.state = 1
             self.number = random.randint(0, 999)

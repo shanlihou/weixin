@@ -8,6 +8,7 @@ Lock = threading.Lock()
 class WORD(object):
     __instance = None
     ranAlpha = ''
+    last = ''
     def __new__(cls, *args, **kwargs):
         if not cls.__instance:
             try:
@@ -63,8 +64,10 @@ class WORD(object):
         result = self.db.getWordByNum(ran)
         newWord = result[0][1]
         print 'word:', newWord
+        tmp = self.last
+        self.last = newWord
         wordList = list(newWord.encode('utf8'))
         wordList = sorted(wordList)
         self.ranAlpha = ''.join(wordList)
         self.filt = []
-        return '猜单词开始：请组一个单词需包含以下字母:' + self.ranAlpha
+        return '猜单词开始：请组一个单词需包含以下字母:' + self.ranAlpha + '\n上一个单词:%s' % tmp
