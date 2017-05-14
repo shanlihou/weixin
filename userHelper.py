@@ -97,6 +97,9 @@ class userHelper(object):
         if num == 1:
             score1 -= 10
             self.updateScore(name1, score1)
+            son = self.getScore(u'鱼塘助手')
+            son += 10      
+            self.updateScore(u'鱼塘助手', son)  
             return '偷取失败， 扣10分'
         num = random.randint(1, 20)
         score1 += num 
