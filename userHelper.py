@@ -23,11 +23,61 @@ class userHelper(object):
         return cls.__instance
     def __init__(self):
         self.db = DBHelper()
+        self.chipList = []
+        self.chipMoney = 0
+        self.sum = 0
+        self.ran = -1
         result = self.db.userQuery()
         for i in result:
             name = self.db.dataDecode(i[0])
             self.mDict[name] = i[1]
-            
+    def chipIn(self, name, money = 0):
+        score = self.getScore(name)
+        if name in self.chipList:
+            return '得了吧，你已经下注'
+        if self.chipMoney == 0:
+            if money == 0:
+                return '没钱就别下注'
+            self.chipMoney = money
+            self.chipList.append(name)
+            self.sum = money
+            score -= money
+        else:
+            if score < self.chipMoney:
+                return '没有钱就别跟注'
+            self.sum += self.chipMoney
+            self.chipList.append(name)
+            score -= self.chipMoney
+        self.updateScore(name, score)
+        return '下注成功，当前积分:%d' % score
+    def setRan(self, ran):
+        if ran < len(self.chipList):
+            self.ran = ran
+            return '操作成功'
+        return '操作失败,没这么多人'
+    def open(self):
+        if len(self.chipList) == 0:
+            return '没有人参与，无法开奖'
+        ran = 0
+        if self.ran == -1:
+            ran = random.randint(0, len(self.chipList) - 1)
+        else:
+            ran = self.ran
+        name = self.chipList[ran]
+        score = self.getScore(name)
+        score += self.sum
+        self.updateScore(name, score)
+        self.chipList = []
+        self.ran = -1
+        self.chipMoney = 0
+        return '获胜者是:%s，获得%d分,当前积分:%d' % (name, self.sum, score)
+    def getChipList(self):
+        strRet = ''
+        count = 0
+        for i in self.chipList:
+            count += 1
+            strRet += str(count) + ':' + i + '\n'
+        return strRet
     def getNickList(self, msg):
         nickList =[]
         username = msg['ActualUserName']

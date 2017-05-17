@@ -15,6 +15,7 @@ from wolf import wolf
 from plane import plane
 from readData import readData
 from planeHelper import planeHelper
+from jpgHelper import jpgHelper
 '''
 def post(url, data):
     req = urllib2.Request(url)  
@@ -152,11 +153,13 @@ for i in range(20):
 print len(img)
 gif.createGIF('D:\\box.gif', img, 256, 256, 0, 0)
 '''
+'''
 planeGame = planeHelper()
 img, strPrint = planeGame.parse('飞行棋', '1')
 img, strPrint = planeGame.parse('飞行棋', '2')
 img, strPrint = planeGame.parse('飞行棋开始', '2')
 print strPrint
+'''
 '''
 for i in range(40):
     if i % 2 == 0:
@@ -168,6 +171,7 @@ for i in range(40):
     if strPrint:
         print strPrint
 '''
+'''
 while 1:
     #strRet = raw_input("Enter your input: ")
     name = raw_input("name: ")
@@ -178,6 +182,8 @@ while 1:
         gif.createGIF('D:\\box.gif', img, 256, 256, 0, 0)
     if strPrint:
         print strPrint
-
+'''
 #getData = readData()
 #getData.read('D:\\tmp\\Core\\weixin-master\\weixin-master\\plane.txt')
+jpg = jpgHelper('D:\\timg.jpg')
+jpg.parser()

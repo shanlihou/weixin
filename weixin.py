@@ -330,6 +330,7 @@ def groupchat_reply(msg):
             users.updateScore(nickName, score)    
             users.updateScore(u'鱼塘助手', son)  
             return
+        '''
         elif len(opt) == 3 and opt[2].isdigit():
             value = string.atoi(opt[2])
             name = opt[1].replace(' ', '')
@@ -354,8 +355,36 @@ def groupchat_reply(msg):
             users.updateScore(nickName, score)    
             users.updateScore(name.decode('utf8'), he)  
             return
+        '''
         itchat.send(u'操作失败', msg['FromUserName']) 
         return 
+    elif data.startswith('chip'):
+        opt = data.split(' ')
+        if len(opt) == 1:
+            opt.append('0')
+        if len(opt) == 2 and opt[1].isdigit():
+            money = string.atoi(opt[1])
+            strRet = users.chipIn(nickName, money)
+            itchat.send(u'%s' % strRet, msg['FromUserName']) 
+            return
+        elif len(opt) == 2 and opt[1].isalpha():
+            if opt[1] == 'open':
+                strRet = users.open()
+                itchat.send(u'%s' % strRet, msg['FromUserName']) 
+                return
+            elif opt[1] == 'get':
+                strRet = users.getChipList()
+                itchat.send(u'%s' % strRet, msg['FromUserName']) 
+                return
+        elif len(opt) == 3 and opt[1].isalpha() and opt[2].isdigit():
+            if opt[1] == 'set':
+                ran = string.atoi(opt[2])
+                strRet = users.setRan(ran)
+                itchat.send(u'%s' % strRet, msg['FromUserName']) 
+                return
+                
+        itchat.send(u'操作失败', msg['FromUserName']) 
+        return
     elif msg[u'Content'] == 'get':
         itchat.send(u'%d' % ran, msg['FromUserName']) 
         return

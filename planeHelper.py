@@ -61,6 +61,9 @@ class planeHelper(object):
                 ran = self.game.getRan()
                 curUser = self.game.getCurColor()
                 self.test += 1
+                if len(self.players == 1):
+                    if curUser == 1:
+                        pass
                 print 'test:%d' % self.test
                 if code == 0:
                     self.game = None
