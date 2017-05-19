@@ -16,6 +16,7 @@ from plane import plane
 from readData import readData
 from planeHelper import planeHelper
 from jpgHelper import jpgHelper
+import math
 '''
 def post(url, data):
     req = urllib2.Request(url)  
@@ -153,13 +154,32 @@ for i in range(20):
 print len(img)
 gif.createGIF('D:\\box.gif', img, 256, 256, 0, 0)
 '''
-'''
+
 planeGame = planeHelper()
 img, strPrint = planeGame.parse('飞行棋', '1')
-img, strPrint = planeGame.parse('飞行棋', '2')
-img, strPrint = planeGame.parse('飞行棋开始', '2')
+#img, strPrint = planeGame.parse('飞行棋', '2')
+img, strPrint = planeGame.parse('飞行棋开始', '1')
 print strPrint
-'''
+count = 0
+def bitrate(x):
+    if x < -20000:
+        return 50 - 20 * math.pow(0.9999, -20000 - x)
+    else:
+        return 50 + 20 * math.pow(0.9999, x + 20000)
+print 'bit:',bitrate(-10000)
+print bitrate(-30000)
+while 1:
+    #strRet = raw_input("Enter your input: ")
+    name = raw_input("name: ")
+    #print strRet
+    print name
+    img, strPrint = planeGame.parse('fly', name)
+    for i in range(len(img)):
+        if img[i]:
+            count += 1
+            gif.createGIF('D:\\box%d.gif' % count, img[i], 256, 256, 0, 0)
+        if strPrint[i]:
+            print strPrint[i]
 '''
 for i in range(40):
     if i % 2 == 0:
@@ -168,18 +188,6 @@ for i in range(40):
         img, strPrint = planeGame.parse('fly', '2')         
     if img:
         gif.createGIF('D:\\box%d.gif' % i, img, 256, 256, 0, 0)
-    if strPrint:
-        print strPrint
-'''
-'''
-while 1:
-    #strRet = raw_input("Enter your input: ")
-    name = raw_input("name: ")
-    #print strRet
-    print name
-    img, strPrint = planeGame.parse('fly', name)
-    if img:
-        gif.createGIF('D:\\box.gif', img, 256, 256, 0, 0)
     if strPrint:
         print strPrint
 '''

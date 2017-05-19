@@ -51,6 +51,15 @@ class guessNumber(object):
                 count += 1
                 strRet += str(count) + ':' + i[0] + ':' + str(i[1]) + '\n'
             return strRet
+        elif recv == '总榜':
+            nickList, nothing = self.users.getNickList(msg)
+            strRet = ''
+            dictRet = self.users.sort()
+            count = 0
+            for i in dictRet:
+                count += 1
+                strRet += str(count) + ':' + i[0] + ':' + str(i[1]) + '\n'
+            return strRet
         elif recv == '猜单词':
             return self.word.getRandWord()
         elif recv == '签到':

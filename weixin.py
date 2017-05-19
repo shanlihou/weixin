@@ -25,6 +25,7 @@ from userHelper import userHelper
 from word import WORD
 import threading
 from planeHelper import planeHelper
+import math
 Lock = threading.Lock()
 reload(sys)  
 sys.setdefaultencoding('utf8')  
@@ -38,6 +39,12 @@ gif = gifHelper()
 brain = None
 ran = random.randint(1, 100)
 planeGame = planeHelper()
+
+def betRate(x):
+    if x < -20000:
+        return int(50 - 20 * math.pow(0.9999, -20000 - x))
+    else:
+        return int(50 + 20 * math.pow(0.9999, x + 20000))
 def post(data):
     #data=urllib.quote_plus(data)
     url = 'http://60.205.206.18/?signature=58a37c24b16f9f442d8854f44edaf85d0687183b&timestamp=1480424201&nonce=2011091517&openid=o1zOPuInKqVUN-7ILHP49CVEIIzs'
@@ -109,9 +116,9 @@ def add_friend(msg):
 def groupchat_reply(msg):
     global DB
     data = msg['Content'].encode("utf-8")
-    print data
     nickList, nickName = users.getNickList(msg)
     #itchat.get_head_img(userName = msg['ActualUserName'], picDir = '1.gif')
+    print nickName, ':', data
     wx_id = 0
     #print itchat.get_contact(username = msg['ActualUserName'])
     if msg['isAt']:
@@ -315,6 +322,10 @@ def groupchat_reply(msg):
             score = users.getScore(nickName)
             son = users.getScore(u'鱼塘助手')
             value = string.atoi(opt[1])
+            edge = betRate(son)
+            print 'edge:', edge
+            if nickName == '蜡笔小丸子' or nickName == '暴走的应工' or nickName == '隔夜果酱':
+                ran -= 10
             if value > score:
                 itchat.send(u'你就没这多钱，还想下注，做梦呢？', msg['FromUserName'])    
                 return
@@ -400,12 +411,16 @@ def groupchat_reply(msg):
         return
     img, strResp = planeGame.parse(data, msg['ActualNickName'])
     if strResp:
-        if img:
-            Lock.acquire()
-            gif.createGIF('plane.gif', img, 256, 256, 0, 0)
-            ret = itchat.send_image('plane.gif', msg['FromUserName'])
-            Lock.release()
-        itchat.send(u'%s' % strResp, msg['FromUserName'])    
+        if type(strResp) == list:
+            for i in range(len(img)):
+                if img[i]:
+                    Lock.acquire()
+                    gif.createGIF('plane.gif', img[i], 256, 256, 0, 0)
+                    ret = itchat.send_image('plane.gif', msg['FromUserName'])
+                    Lock.release()
+                itchat.send(u'%s' % strResp[i], msg['FromUserName'])  
+        else:
+            itchat.send(u'%s' % strResp, msg['FromUserName'])   
         return
     
     strResp = guess.parse(msg[u'Content'], nickName, msg)

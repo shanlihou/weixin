@@ -51,7 +51,7 @@ class DBHelper(object):
         return ret
     def insert(self, timeStr, info, tType=0):
         sql = 'insert notify(time, info, type) values(%s, %s, %s)'
-        print type(tType)
+        #print type(tType)
         self.cur.execute(sql, (timeStr, info, tType))
         self.conn.commit()       
     def filtInsert(self, key, value):
@@ -114,7 +114,7 @@ class DBHelper(object):
     def userUpdate(self, username, score):
         username = self.dataEncode(username)
         sql = "update user_info i set i.score = %s where i.username = '%s'"
-        print sql % (str(score), username)
+        #print sql % (str(score), username)
         self.cur.execute(sql % (str(score), username))
         self.conn.commit()
     def wolfUpdate(self, name, time):

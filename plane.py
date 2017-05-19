@@ -9,7 +9,8 @@ class plane(object):
         self.route = [(4, 1), (4, 2), (4, 3), (3, 4), (2, 4), (1, 4), (0, 5), (0, 6), (0, 7), (0, 8), (0, 9), (1, 10), (2, 10), (3, 10), (4, 11), (4, 12), (4, 13), (5, 14), (6, 14), (7, 14), (8, 14), (9, 14), (10, 13), (10, 12), (10, 11), (11, 10), (12, 10), (13, 10), (14, 9), (14, 8), (14, 7), (14, 6), (14, 5), (13, 4), (12, 4), (11, 4), (10, 3), (10, 2), (10, 1), (9, 0), (8, 0), (7, 0), (6, 0), (5, 0)]
         self.startPos = [[(13, 0), (13, 1), (14, 0), (14, 1)], [(0, 0), (0, 1), (1, 0), (1, 1)], [(0, 13), (0, 14), (1, 13), (1, 14)], [(13, 13), (13, 14), (14, 13), (14, 14)]]
         self.gamePos = [(33, 30), (0, 41), (11, 8), (22, 19)]
-        self.chessPos = [[-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1]]
+        #self.chessPos = [[-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1]]
+        self.chessPos = [[13, 3, -1, -1], [16, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1]]
         self.chessGamePos = [[-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1]]
         self.ran = 0
         self.curColor = 0
@@ -61,6 +62,8 @@ class plane(object):
                     return i, j
         return None
     def getSameColor(self, pos, color):
+        if pos == -1:
+            return -1
         for i in range(4):
             if self.chessPos[color][i] == pos:
                 return i
@@ -125,6 +128,7 @@ class plane(object):
                 endPos += 4
                 pos = (pos + 4) % 44
                 tmp = self.getGamePosColor(pos)
+                self.chessPos[self.curColor][num] = endPos
                 if tmp:
                     self.drawChess(self.chessPos[tmp[0]][tmp[1]], tmp[1], tmp[0])
                 else:
@@ -159,6 +163,7 @@ class plane(object):
     def drawMove(self, pos, step, num, color, reverse = False):
         for i in range(step):
             gamePos = self.getGamePos(pos + i, color)
+            #print pos, gamePos, step, num, color, reverse
             if gamePos != -1:
                 tmp = self.getGamePosColor(gamePos)
                 if tmp:
@@ -188,9 +193,9 @@ class plane(object):
             y = self.startPos[color][num][1]
         elif pos < 42:
             start = self.gamePos[color][0]
-            pos = (start + pos) % 44
-            x = self.route[pos][0]
-            y = self.route[pos][1]
+            gamePos = (start + pos) % 44
+            x = self.route[gamePos][0]
+            y = self.route[gamePos][1]
         else:
             end = self.gamePos[color][1]
             x = self.route[end][0]

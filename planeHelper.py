@@ -8,6 +8,8 @@ class planeHelper(object):
         self.test = 0
         pass
     def startGame(self):
+        if len(self.players) == 1:
+            self.players.append('computer')
         self.game = plane(len(self.players))
         ran = self.game.rollRan()
         img = [self.game.createFrame()]
@@ -32,8 +34,7 @@ class planeHelper(object):
                 return self.startGame()
             return None, '参与玩家:%s' % self.getPlayers()
         elif recv == '飞行棋开始':
-            if name in self.players and self.game == None and len(self.players) >= 2:
-                self.game = plane
+            if name in self.players and self.game == None:
                 return self.startGame()
             return None, '你不是玩家或人数少于2'
         elif recv == '飞行棋结束':
@@ -61,20 +62,26 @@ class planeHelper(object):
                 ran = self.game.getRan()
                 curUser = self.game.getCurColor()
                 self.test += 1
-                if len(self.players == 1):
-                    if curUser == 1:
-                        pass
                 print 'test:%d' % self.test
+                strRet = ''
                 if code == 0:
                     self.game = None
                     self.players = []
-                    return img, '%d:游戏结束，获胜玩家:%s' % (self.test, self.players[curUser])
+                    strRet = '%d:游戏结束，获胜玩家:%s' % (self.test, self.players[curUser])
                 if code == 1:
-                    return img, '%d:走棋成功\n下一玩家:%s\n下一点数:%d' % (self.test, self.players[curUser], ran)
+                    strRet = '%d:走棋成功\n下一玩家:%s\n下一点数:%d' % (self.test, self.players[curUser], ran)
                 elif code == 2:
-                    return None, '%d:无期可走，抬走，下一个\n下一玩家:%s\n下一点数:%d' % (self.test, self.players[curUser], ran)
+                    strRet = '%d:无期可走，抬走，下一个\n下一玩家:%s\n下一点数:%d' % (self.test, self.players[curUser], ran)
                 elif code == 3:
-                    return None, '%d:恭喜你获得了起飞机会，请走\n下一玩家:%s\n下一点数:%d' % (self.test, self.players[curUser], ran)
+                    strRet = '%d:恭喜你获得了起飞机会，请走\n下一玩家:%s\n下一点数:%d' % (self.test, self.players[curUser], ran)
+                retImg = [img]
+                retStr = [strRet]
+                if self.players[1] == 'computer' and curUser == 1:
+                    tmpImg, tmpStr = self.parse('fly', 'computer')
+                    retImg.extend(tmpImg)
+                    retStr.extend(tmpStr)
+                    pass
+                return retImg, retStr
             else:
                 return None, '能不能好好走棋'
         return None, None
