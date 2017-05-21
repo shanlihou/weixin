@@ -90,9 +90,9 @@ class userHelper(object):
     def getScore(self, username):
         if self.mDict.has_key(username):
             return self.mDict[username]
-        self.mDict[username] = 100
-        self.db.userInsert(username, 100)
-        return 100
+        self.mDict[username] = 0
+        self.db.userInsert(username, 0)
+        return 0
     
     def updateScore(self, username, score):
         if self.mDict.has_key(username):

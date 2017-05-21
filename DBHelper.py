@@ -24,6 +24,7 @@ class DBHelper(object):
         self.cur.execute("create table if not exists notify_all(id int NOT NULL AUTO_INCREMENT, wx_id varchar(40), date varchar(20), time varchar(20), info varchar(50), type varchar(8), PRIMARY KEY (id))")
         self.cur.execute("create table if not exists user_info(username varchar(50), score int, PRIMARY KEY (username))")
         self.cur.execute("create table if not exists wolf(id int NOT NULL AUTO_INCREMENT, name varchar(50), time varchar(20), PRIMARY KEY (id))")
+        self.cur.execute("create table if not exists bet(id int NOT NULL AUTO_INCREMENT, edge int,  probability int, PRIMARY KEY (id))")
         #type 0: times, 1: week or date, 2: reverse or not
         self.cur.execute('set collation_database=utf8_general_ci;')
         self.cur.execute('set collation_server=utf8_general_ci;')
@@ -76,7 +77,10 @@ class DBHelper(object):
         sql = 'insert wolf(name, time) values(%s, %s)'
         self.cur.execute(sql, (name.encode('utf8'), time))
         self.conn.commit()
-        
+    def betInsert(self, edge, probability):
+        sql = 'insert bet(edge, probability) values(%s, %s)'
+        self.cur.execute(sql, (edge, probability))
+        self.conn.commit()
         
     def query(self, timeStr):
         sql = 'select * from notify where time = %s'
@@ -105,6 +109,11 @@ class DBHelper(object):
         sql = 'select * from words where ID = %d'
         count = self.cur.execute(sql % (num))
         return self.cur.fetchmany(count)
+    def betQuery(self):
+        sql = 'select * from bet'
+        count = self.cur.execute(sql)
+        return self.cur.fetchmany(count)
+        
        
     
     def filtUpdate(self, key, value):
@@ -121,6 +130,10 @@ class DBHelper(object):
         username = self.dataEncode(name)
         sql = "update wolf i set i.time = %s where i.name = '%s'"
         self.cur.execute(sql % (time, name))
+        self.conn.commit()
+    def betUpdate(self, edge, probability):
+        sql = "update bet i set i.probability = %d where i.edge = '%d'"
+        self.cur.execute(sql % (probability, edge))
         self.conn.commit()
         
     def delete(self, id):
@@ -145,6 +158,10 @@ class DBHelper(object):
     def allDelete(self, id):
         sql = 'delete from notify_all where id = %s'
         self.cur.execute(sql % (str(id)))
+        self.conn.commit()
+    def betDelete(self, edge):
+        sql = 'delete from bet where edge = %d'
+        self.cur.execute(sql % edge)
         self.conn.commit()
     
     def printDB(self, DBName):

@@ -14,6 +14,7 @@ import random
 import string
 from zzckz import cicy
 from contacts import contacts
+from betHelper import betHelper
 #from logWeixin import logWeixin
 from DBHelper import DBHelper
 from filter import filtHelper
@@ -39,7 +40,7 @@ gif = gifHelper()
 brain = None
 ran = random.randint(1, 100)
 planeGame = planeHelper()
-
+BET = betHelper()
 def betRate(x):
     if x < -20000:
         return int(50 - 20 * math.pow(0.9999, -20000 - x))
@@ -119,6 +120,7 @@ def groupchat_reply(msg):
     nickList, nickName = users.getNickList(msg)
     #itchat.get_head_img(userName = msg['ActualUserName'], picDir = '1.gif')
     print nickName, ':', data
+    global ran
     wx_id = 0
     #print itchat.get_contact(username = msg['ActualUserName'])
     if msg['isAt']:
@@ -212,21 +214,30 @@ def groupchat_reply(msg):
     elif data.startswith('print'):
         opt = data.split(' ')
         if len(opt) == 2:
-            if opt[1] == 'notify' or opt[1] == 'notify_all' or opt[1] == 'filter' or opt[1] == 'user_info':
+            if opt[1] == 'notify' or opt[1] == 'notify_all' or opt[1] == 'filter' or opt[1] == 'user_info' or opt[1] == 'bet':
                 strRet = DB.printDB(opt[1])
                 itchat.send(u'%s' % (strRet), msg['FromUserName']) 
                 return 
         itchat.send(u'操作失败', msg['FromUserName']) 
     elif data.startswith('delete'):
         opt = data.split(' ')
-        if len(opt) == 3 and opt[2].isdigit():
+        if len(opt) == 3 and opt[1] == 'bet' and opt[2].isdigit():
+            ret = BET.delete(string.atoi(opt[2]))
+            if ret:
+                itchat.send(u'操作成功', msg['FromUserName']) 
+                return
+            else:
+                itchat.send(u'操作失败', msg['FromUserName']) 
+                return
+        elif len(opt) == 3 and opt[2].isdigit():
             if opt[1] == 'notify':
                 DB.delete(opt[2])
             elif opt[1] == 'notify_all':
                 DB.allDelete(opt[2])
             itchat.send(u'操作成功', msg['FromUserName']) 
-            return 
+            return
         itchat.send(u'操作失败', msg['FromUserName']) 
+        return
     elif data.startswith('steal'):
         opt = data.split(' ')
         if len(opt) == 2:
@@ -244,6 +255,14 @@ def groupchat_reply(msg):
                 userName = i['UserName']
                 if userName == msg['ActualUserName']:
                     opt = data.split(' ')
+                    if len(opt) == 3 and opt[1].isdigit() and opt[2].isdigit():
+                        BET.setEdge(string.atoi(opt[1]), string.atoi(opt[2]))
+                        itchat.send(u'操作成功', msg['FromUserName']) 
+                        return
+                    elif len(opt) == 3 and opt[1] == 'prob' and opt[2].isdigit():
+                        ran = string.atoi(opt[2])
+                        itchat.send(u'操作成功', msg['FromUserName']) 
+                        return
                     users.updateScore(opt[1].decode('utf8'), string.atoi(opt[2]))
                     itchat.send(u'操作成功', msg['FromUserName']) 
                     return
@@ -316,20 +335,24 @@ def groupchat_reply(msg):
         itchat.send(u'操作失败', msg['FromUserName']) 
         return 
     elif data.startswith('bet'):
-        global ran
         opt = data.split(' ')
         if len(opt) == 2 and opt[1].isdigit():
             score = users.getScore(nickName)
             son = users.getScore(u'鱼塘助手')
             value = string.atoi(opt[1])
-            edge = betRate(son)
+            result = BET.sort()
+            edge = 50
+            for i in result:
+                if value > i[0]:
+                    edge = i[1]
+                    break
             print 'edge:', edge
             if nickName == '蜡笔小丸子' or nickName == '暴走的应工' or nickName == '隔夜果酱':
                 ran -= 10
             if value > score:
                 itchat.send(u'你就没这多钱，还想下注，做梦呢？', msg['FromUserName'])    
                 return
-            if ran < 51:
+            if ran < edge:
                 score += value
                 son -= value
                 itchat.send(u'恭喜你，压中了，当前积分:%d' % score, msg['FromUserName']) 
@@ -486,19 +509,19 @@ def notifyAll(info):
         
 def timeFunc():     
     while(1):
-        now = time.localtime(time.time())
+        #now = time.localtime(time.time())
         timeStr = time.strftime('%H%M')
         result = DB.query(timeStr)
         for i in result:
             notifyMe('%s:%s' % (i[1], i[2]))
             if i[3] == 0:
                 DB.delete(i[0])
-        if now.tm_hour == 22 and now.tm_min == 0:
-            recv = robotChat('明天天气怎么样', 1)
-            notifyMe(recv)
-        elif now.tm_hour == 6 and now.tm_min == 30:
-            recv = robotChat('今天天气怎么样', 1)
-            notifyMe(recv)
+        #if now.tm_hour == 22 and now.tm_min == 0:
+            #recv = robotChat('明天天气怎么样', 1)
+            #notifyMe(recv)
+        #elif now.tm_hour == 6 and now.tm_min == 30:
+            #recv = robotChat('今天天气怎么样', 1)
+            #notifyMe(recv)
         
         result = DB.allQuery(timeStr)
         for i in result:

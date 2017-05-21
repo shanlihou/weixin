@@ -16,6 +16,7 @@ from plane import plane
 from readData import readData
 from planeHelper import planeHelper
 from jpgHelper import jpgHelper
+from betHelper import betHelper
 import math
 '''
 def post(url, data):
@@ -154,20 +155,14 @@ for i in range(20):
 print len(img)
 gif.createGIF('D:\\box.gif', img, 256, 256, 0, 0)
 '''
-
+'''
 planeGame = planeHelper()
 img, strPrint = planeGame.parse('飞行棋', '1')
 #img, strPrint = planeGame.parse('飞行棋', '2')
 img, strPrint = planeGame.parse('飞行棋开始', '1')
 print strPrint
 count = 0
-def bitrate(x):
-    if x < -20000:
-        return 50 - 20 * math.pow(0.9999, -20000 - x)
-    else:
-        return 50 + 20 * math.pow(0.9999, x + 20000)
-print 'bit:',bitrate(-10000)
-print bitrate(-30000)
+
 while 1:
     #strRet = raw_input("Enter your input: ")
     name = raw_input("name: ")
@@ -181,6 +176,7 @@ while 1:
         if strPrint[i]:
             print strPrint[i]
 '''
+'''
 for i in range(40):
     if i % 2 == 0:
         img, strPrint = planeGame.parse('fly', '1')
@@ -191,7 +187,16 @@ for i in range(40):
     if strPrint:
         print strPrint
 '''
+bet = betHelper()
+bet.setEdge(58, 98)
+bet.setEdge(59, 42)
+bet.setEdge(543, 5353)
+bet.setEdge(4234, 234234)
+bet.setEdge(58, 44)
+bet.delete(543)
+print bet.sort()
+print db.printDB('bet')
 #getData = readData()
 #getData.read('D:\\tmp\\Core\\weixin-master\\weixin-master\\plane.txt')
-jpg = jpgHelper('D:\\timg.jpg')
-jpg.parser()
+#jpg = jpgHelper('D:\\timg.jpg')
+#jpg.parser()
