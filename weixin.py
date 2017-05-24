@@ -27,6 +27,7 @@ from word import WORD
 import threading
 from planeHelper import planeHelper
 import math
+from record import record
 Lock = threading.Lock()
 reload(sys)  
 sys.setdefaultencoding('utf8')  
@@ -41,6 +42,7 @@ brain = None
 ran = random.randint(1, 100)
 planeGame = planeHelper()
 BET = betHelper()
+RECORD = record()
 def betRate(x):
     if x < -20000:
         return int(50 - 20 * math.pow(0.9999, -20000 - x))
@@ -122,6 +124,7 @@ def groupchat_reply(msg):
     print nickName, ':', data
     global ran
     wx_id = 0
+    RECORD.insert(msg['FromUserName'], nickName + ':' + data, len(msg['User']['MemberList']))
     #print itchat.get_contact(username = msg['ActualUserName'])
     if msg['isAt']:
         recvMsg = msg['Content'].replace('@鱼塘助手', '').replace(' ', '').replace(' ', '')
@@ -392,6 +395,20 @@ def groupchat_reply(msg):
         '''
         itchat.send(u'操作失败', msg['FromUserName']) 
         return 
+    elif data.startswith('record'):
+        opt = data.split(' ')
+        if len(opt) == 2 and opt[1].isdigit():
+            index = string.atoi(opt[1])
+            strRet = RECORD.getData(index)
+            itchat.send(u'%s' % strRet, msg['FromUserName']) 
+            return
+        elif len(opt) == 2 and opt[1] == 'print':
+            strRet = RECORD.printInfo()
+            itchat.send(u'%s' % strRet, msg['FromUserName']) 
+            return
+        itchat.send(u'操作失败', msg['FromUserName']) 
+        return
+            
     elif data.startswith('chip'):
         opt = data.split(' ')
         if len(opt) == 1:
