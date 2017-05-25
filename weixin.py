@@ -350,8 +350,6 @@ def groupchat_reply(msg):
                     edge = i[1]
                     break
             print 'edge:', edge
-            if nickName == '蜡笔小丸子' or nickName == '暴走的应工' or nickName == '隔夜果酱':
-                ran -= 10
             if value > score:
                 itchat.send(u'你就没这多钱，还想下注，做梦呢？', msg['FromUserName'])    
                 return
