@@ -39,15 +39,28 @@ class filtHelper(object):
         if self.filtDict.has_key(key):
             return self.filtDict[key]
         return None
+    def getX(self, data):
+        strRet = ''
+        for i in data:
+            strRet += str(ord(i)) + ' '
+        return strRet
     def delete(self, key):
+        '''
         for i in self.filtDict:
-            print type(i), i
-        print type(key), key
+            print i, self.getX(i)
+        print type(key), key, self.getX(key)
+        '''
         if self.filtDict.has_key(key.decode('utf8')):
             print 'enter in'
             self.filtDict.pop(key.decode('utf8'))
             self.db.filtDelete(key)
             return True
+        elif self.filtDict.has_key(key):
+            print 'enter in'
+            self.filtDict.pop(key)
+            self.db.filtDelete(key)
+            return True
+            
         return False
 
             

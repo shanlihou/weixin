@@ -25,6 +25,7 @@ class DBHelper(object):
         self.cur.execute("create table if not exists user_info(username varchar(50), score int, PRIMARY KEY (username))")
         self.cur.execute("create table if not exists wolf(id int NOT NULL AUTO_INCREMENT, name varchar(50), time varchar(20), PRIMARY KEY (id))")
         self.cur.execute("create table if not exists bet(id int NOT NULL AUTO_INCREMENT, edge int,  probability int, PRIMARY KEY (id))")
+        self.cur.execute("create table if not exists random(id int NOT NULL AUTO_INCREMENT, type varchar(255),  item varchar(255), PRIMARY KEY (id))")
         #type 0: times, 1: week or date, 2: reverse or not
         self.cur.execute('set collation_database=utf8_general_ci;')
         self.cur.execute('set collation_server=utf8_general_ci;')
@@ -118,7 +119,7 @@ class DBHelper(object):
     
     def filtUpdate(self, key, value):
         sql = "update filter i set i.value = '%s' where i.key_ = '%s'"
-        self.cur.execute(sql % (key, value))
+        self.cur.execute(sql % (value, key))
         self.conn.commit()
     def userUpdate(self, username, score):
         username = self.dataEncode(username)

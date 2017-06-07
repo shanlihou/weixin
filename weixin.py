@@ -86,7 +86,14 @@ def robotChat(data, id):
     strRet = ''
     strRet = parseJson(stJson)
     return strRet
-
+def authority(name):
+    me = itchat.search_friends(remarkName='父母')  
+    if me:
+        for i in me:
+            if name == i['UserName']:
+                return True
+    return False
+            
 @itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING])
 def text_reply(msg):
     print 'text_reply:' 
@@ -157,6 +164,9 @@ def groupchat_reply(msg):
         itchat.send(u'%s 搜索失败' % (recv[len('movie ')]), msg['FromUserName'])
         
     elif data.startswith('notify'): 
+        if not authority(msg['ActualUserName']):
+            itchat.send(u'你不是gm', msg['FromUserName']) 
+            return
         notify = data.split(' ')
         if notify[1].isdigit() and len(notify[1]) == 4 and len(notify[2]) < 50:
             if len(notify) == 3:
@@ -215,6 +225,9 @@ def groupchat_reply(msg):
             return 
         itchat.send(u'操作失败', msg['FromUserName']) 
     elif data.startswith('print'):
+        if not authority(msg['ActualUserName']):
+            itchat.send(u'你不是gm', msg['FromUserName']) 
+            return
         opt = data.split(' ')
         if len(opt) == 2:
             if opt[1] == 'notify' or opt[1] == 'notify_all' or opt[1] == 'filter' or opt[1] == 'user_info' or opt[1] == 'bet':
@@ -222,7 +235,11 @@ def groupchat_reply(msg):
                 itchat.send(u'%s' % (strRet), msg['FromUserName']) 
                 return 
         itchat.send(u'操作失败', msg['FromUserName']) 
+        return
     elif data.startswith('delete'):
+        if not authority(msg['ActualUserName']):
+            itchat.send(u'你不是gm', msg['FromUserName']) 
+            return
         opt = data.split(' ')
         if len(opt) == 3 and opt[1] == 'bet' and opt[2].isdigit():
             ret = BET.delete(string.atoi(opt[2]))
@@ -350,6 +367,8 @@ def groupchat_reply(msg):
                     edge = i[1]
                     break
             print 'edge:', edge
+            if nickName == '蜡笔小丸子' or nickName == '暴走的应工' or nickName == '隔夜果酱':
+                ran -= 10
             if value > score:
                 itchat.send(u'你就没这多钱，还想下注，做梦呢？', msg['FromUserName'])    
                 return
@@ -394,6 +413,9 @@ def groupchat_reply(msg):
         itchat.send(u'操作失败', msg['FromUserName']) 
         return 
     elif data.startswith('record'):
+        if not authority(msg['ActualUserName']):
+            itchat.send(u'你不是gm', msg['FromUserName']) 
+            return
         opt = data.split(' ')
         if len(opt) == 2 and opt[1].isdigit():
             index = string.atoi(opt[1])
@@ -435,6 +457,9 @@ def groupchat_reply(msg):
         itchat.send(u'操作失败', msg['FromUserName']) 
         return
     elif msg[u'Content'] == 'get':
+        if not authority(msg['ActualUserName']):
+            itchat.send(u'你不是gm', msg['FromUserName']) 
+            return
         itchat.send(u'%d' % ran, msg['FromUserName']) 
         return
     elif msg[u'Content'] == '愤怒的小脑':
