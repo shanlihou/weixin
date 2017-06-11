@@ -12,6 +12,7 @@ import os
 import json
 import random
 import string
+from wolf import wolf
 from zzckz import cicy
 from contacts import contacts
 from betHelper import betHelper
@@ -43,6 +44,7 @@ ran = random.randint(1, 100)
 planeGame = planeHelper()
 BET = betHelper()
 RECORD = record()
+WOLF = wolf()
 def betRate(x):
     if x < -20000:
         return int(50 - 20 * math.pow(0.9999, -20000 - x))
@@ -471,6 +473,13 @@ def groupchat_reply(msg):
         ret = itchat.send_image('brain.gif', msg['FromUserName'])
         itchat.send(u'游戏开始请输入:throw angle fire offset\n角度 火力 位移，如:throw 25 90 10', msg['FromUserName']) 
         Lock.release()
+        return
+    elif msg[u'Content'] == '报名':
+        if nickName == '父母':
+            nickName = '隔夜果酱'.decode('utf8')
+            print nickName
+        strRet = WOLF.sign(nickName)
+        itchat.send(u'%s' % strRet, msg['FromUserName']) 
         return
     img, strResp = planeGame.parse(data, msg['ActualNickName'])
     if strResp:

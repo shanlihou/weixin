@@ -1,3 +1,9 @@
 #/bin/sh
-pid=`ps -aux|grep 'python weixin.py'|awk '{print $2}'|head -1`
-kill -9 $pid
+echo `ps -aux|grep 'python weixin.py'`
+#pid=`ps -aux|grep 'python weixin.py'|awk '{print $2}'|head -1`
+pid=`ps -aux|grep 'python weixin.py'|awk '{print $2}'`
+echo $pid
+for i in $pid
+do 
+    kill -9 $i
+done

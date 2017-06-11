@@ -21,6 +21,7 @@ class DBHelper(object):
         self.cur = self.conn.cursor()
         self.cur.execute("create table if not exists notify(id int NOT NULL AUTO_INCREMENT, time varchar(20), info varchar(50), type int, PRIMARY KEY (id))")
         self.cur.execute("create table if not exists filter(key_ varchar(20), value varchar(50), PRIMARY KEY (key_))")
+        self.cur.execute("create table if not exists mfilter(id int NOT NULL AUTO_INCREMENT, key_ varchar(60), value varchar(255), PRIMARY KEY (id))")
         self.cur.execute("create table if not exists notify_all(id int NOT NULL AUTO_INCREMENT, wx_id varchar(40), date varchar(20), time varchar(20), info varchar(50), type varchar(8), PRIMARY KEY (id))")
         self.cur.execute("create table if not exists user_info(username varchar(50), score int, PRIMARY KEY (username))")
         self.cur.execute("create table if not exists wolf(id int NOT NULL AUTO_INCREMENT, name varchar(50), time varchar(20), PRIMARY KEY (id))")
@@ -82,6 +83,10 @@ class DBHelper(object):
         sql = 'insert bet(edge, probability) values(%s, %s)'
         self.cur.execute(sql, (edge, probability))
         self.conn.commit()
+    def mFilterInsert(self, key, value):
+        sql = 'insert mfilter(key_, value) values(%s, %s)'
+        self.cur.execute(sql, (key, value))
+        self.conn.commit()
         
     def query(self, timeStr):
         sql = 'select * from notify where time = %s'
@@ -90,6 +95,11 @@ class DBHelper(object):
         return result
     def filtQuery(self):
         sql = 'select * from filter'
+        count = self.cur.execute(sql)
+        result = self.cur.fetchmany(count)
+        return result
+    def mFiltQuery(self):
+        sql = 'select * from mfilter'
         count = self.cur.execute(sql)
         result = self.cur.fetchmany(count)
         return result
@@ -119,6 +129,10 @@ class DBHelper(object):
     
     def filtUpdate(self, key, value):
         sql = "update filter i set i.value = '%s' where i.key_ = '%s'"
+        self.cur.execute(sql % (value, key))
+        self.conn.commit()
+    def filtUpdate(self, key, value):
+        sql = "update mfilter i set i.value = '%s' where i.key_ = '%s'"
         self.cur.execute(sql % (value, key))
         self.conn.commit()
     def userUpdate(self, username, score):
@@ -152,6 +166,21 @@ class DBHelper(object):
                 print i
             '''
             sql = "delete from filter where key_ = '%s'"
+            self.cur.execute(sql % (key))
+            self.conn.commit()
+        except OperationalError, e:
+            print OperationalError, e
+    def mFiltDelete(self, key):
+        try:
+            '''
+            sql = 'select * from filter where key_ = %s'
+            count = self.cur.execute(sql % (key))
+            result = self.cur.fetchmany(count)
+            print 'result:'
+            for i in result:
+                print i
+            '''
+            sql = "delete from mfilter where key_ = '%s'"
             self.cur.execute(sql % (key))
             self.conn.commit()
         except OperationalError, e:

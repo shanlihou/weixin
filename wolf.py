@@ -29,11 +29,22 @@ class wolf(object):
         strRet = '%d%02d%02d' % (now.tm_year, now.tm_mon, now.tm_mday)
         return strRet
     def sign(self, name):
-        time = self.getCurWeek()
+        tmpTime = self.getCurWeek()
         if self.mDict.has_key(name):
-            self.db.wolfUpdate(name, time)
+            self.db.wolfUpdate(name, tmpTime)
         else:
-            self.db.wolfInsert(name, time)
-        self.mDict[name] = time
+            self.db.wolfInsert(name, tmpTime)
+        self.mDict[name] = tmpTime
+        return self.getAll()
     def getAll(self):
-        pass
+        tmpTime = self.getCurWeek()
+        strRet = '本周游戏车队发车啦:\n呜呜呜呜呜呜呜~~\n'
+        count = 0
+        for i in self.mDict.items():
+            if i[1] == tmpTime:
+                count += 1
+                strRet += str(count) + '.' + i[0] + '\n'
+        return strRet
+        
+            
+        
