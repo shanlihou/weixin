@@ -512,7 +512,7 @@ def groupchat_reply(msg):
 
     num = random.randint(0, 20)
     print num
-    if num == 1:
+    if num == 1111:
         recvMsg = msg['Content']
         recv = robotChat(recvMsg, 1)
         itchat.send(u'%s' % (recv), msg['FromUserName'])           

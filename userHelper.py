@@ -119,8 +119,8 @@ class userHelper(object):
             return '所送分数超过你所能给'
         score1 -= num 
         score2 += num
-        self.updateScore(name1, score1)
         self.updateScore(name2, score2)
+        self.updateScore(name1, score1)
         return 'give成功，give到%d分' % num
         
     def steal(self, name1, name2):
